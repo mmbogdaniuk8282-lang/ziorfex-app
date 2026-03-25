@@ -3,53 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX NEURAL ULTIMATUM</title>
+    <title>BOGDANIUK SIGNAL BOT</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@500;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=JetBrains+Mono:wght@500;800&display=swap');
         
         :root {
-            --neon: #00ffaa; --red: #ff3366; --bg: #030305;
+            --neon: #00ffaa; --pink: #ff0055; --bg: #030305; --text: #fff;
             --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(0, 255, 170, 0.15);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            margin: 0; padding: 15px; background: var(--bg); color: #fff;
+            margin: 0; padding: 10px; background: var(--bg); color: var(--text);
             font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
             display: flex; flex-direction: column;
         }
 
-        /* Анімований фон з частинками */
-        #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.4; }
-        .noise { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.05; pointer-events: none; }
-
+        /* Сканер лінії */
+        .noise { position: fixed; inset: 0; background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Noise_Texture.png'); opacity: 0.01; pointer-events: none; }
+        
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .logo { font-family: 'Orbitron'; font-size: 11px; color: var(--neon); letter-spacing: 3px; text-shadow: 0 0 10px var(--neon); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px; margin-bottom: 15px; }
+        .logo { font-size: 11px; color: var(--neon); letter-spacing: 4px; font-weight: 800; text-transform: uppercase; }
 
-        /* PRICE MONITOR */
+        /* PRICE MONITOR - Відновлено як на скріншоті */
         .monitor {
             background: var(--glass); border: 1px solid var(--border); border-radius: 30px;
-            padding: 25px; backdrop-filter: blur(20px); text-align: center; margin-bottom: 20px;
-            position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            padding: 25px; backdrop-filter: blur(20px); text-align: center; margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        #price { font-family: 'Orbitron'; font-size: 52px; font-weight: 900; letter-spacing: -2px; }
-        .hft-chart { height: 40px; display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 15px; }
-        .tick { width: 3px; background: var(--neon); border-radius: 10px; transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        #active-asset { font-size: 9px; color: #333; letter-spacing: 5px; margin-bottom: 8px; text-transform: uppercase; }
+        
+        /* ШРИФТ ЯК НА СКРІНШОТІ */
+        #price { font-family: 'Geo', sans-serif; font-size: 58px; font-weight: 700; color: #fff; letter-spacing: -2px; }
+        
+        /* HFT MONITOR ЯК НА СКРІНШОТІ */
+        .hft-meter { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; height: 30px; align-items: flex-end; justify-content: center; margin-top: 15px; }
+        .bar { width: 4px; background: var(--neon); border-radius: 1px; transition: height 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
 
-        .u-label { font-size: 8px; color: var(--neon); text-transform: uppercase; margin: 10px 0 10px 15px; letter-spacing: 2px; opacity: 0.5; }
+        .u-label { font-size: 8px; color: var(--neon); text-transform: uppercase; margin: 15px 0 10px 15px; letter-spacing: 3px; opacity: 0.4; }
 
         /* ASSET SCROLLER */
         .scroller { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; scrollbar-width: none; }
         .scroller::-webkit-scrollbar { display: none; }
         .card {
-            min-width: 125px; background: var(--glass); border: 1px solid rgba(255,255,255,0.05);
+            min-width: 120px; background: var(--glass); border: 1px solid rgba(255,255,255,0.05);
             padding: 18px; border-radius: 20px; text-align: center; font-size: 11px; font-weight: 800;
             color: #444; transition: 0.3s;
         }
         .card.active { border-color: var(--neon); color: #fff; background: rgba(0, 255, 170, 0.08); box-shadow: 0 0 20px rgba(0, 255, 170, 0.1); }
+        .card i { display: inline-block; vertical-align: middle; margin-right: 5px; font-size: 14px; }
 
         /* EXPIRATION GRID */
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
@@ -59,32 +65,27 @@
         }
         .btn-tf.active { border-color: var(--neon); color: var(--neon); box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.05); }
 
-        /* MAIN BUTTON */
+        /* MAIN BUTTON ЯК НА СКРІНШОТІ */
         .btn-main {
             width: 100%; padding: 26px; border-radius: 25px; border: none;
             background: linear-gradient(135deg, var(--neon), #00ccff);
-            color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 18px;
-            box-shadow: 0 15px 35px rgba(0, 255, 170, 0.3); margin-top: auto;
-            position: relative; overflow: hidden;
+            color: #000; font-weight: 900; font-size: 18px; text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(0, 255, 170, 0.3); margin-top: auto;
+            transition: transform 0.1s;
         }
-        .btn-main:active { transform: scale(0.96); }
+        .btn-main:active { transform: scale(0.97); }
 
-        /* OVERLAY */
+        /* OVERLAY результату (як у v40) */
         #overlay {
             display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000;
             flex-direction: column; align-items: center; justify-content: center;
         }
         .scan-line { width: 100%; height: 2px; background: var(--neon); position: absolute; top: 50%; transform: scaleX(0); transition: 5s linear; box-shadow: 0 0 25px var(--neon); }
-        
-        #result { display: none; text-align: center; width: 100%; animation: zoomIn 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-        #dir { font-family: 'Orbitron'; font-size: 100px; font-weight: 900; line-height: 1; }
-        .badge { padding: 12px 30px; border-radius: 40px; background: rgba(0, 255, 170, 0.1); color: var(--neon); font-weight: 800; font-size: 20px; margin-top: 20px; display: inline-block; border: 1px solid var(--border); }
+        #overlay-loader { font-size: 12px; color: var(--neon); letter-spacing: 10px; text-transform: uppercase; font-family: 'Geo'; }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
     <div class="noise"></div>
 
     <audio id="snd-click" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
@@ -93,21 +94,22 @@
 
     <div class="header">
         <div class="logo">NEURAL ULTIMATUM G5</div>
-        <div id="status" style="font-size: 8px; color: var(--neon);">● CORE_CONNECTED</div>
+        <div style="font-size: 8px; color: var(--neon);">● CORE_CONNECTED</div>
     </div>
 
     <div class="monitor">
-        <div id="active-asset" style="font-size: 9px; color: #333; letter-spacing: 4px; margin-bottom: 5px;">AUD/CAD (OTC)</div>
-        <div id="price">0.91242</div>
-        <div class="hft-chart" id="chart"></div>
+        <div id="active-asset">AUD/CAD (OTC)</div>
+        <div id="price">0.91230</div>
+        
+        <div class="hft-meter" id="hft-meter"></div>
     </div>
 
     <span class="u-label">Neural Asset Scanner</span>
     <div class="scroller">
-        <div class="card active" onclick="setAsset('AUD/CAD', this)">🌕 AUD/CAD</div>
-        <div class="card" onclick="setAsset('EUR/USD', this)">🇪🇺 EUR/USD</div>
-        <div class="card" onclick="setAsset('GBP/JPY', this)">🇬🇧 GBP/JPY</div>
-        <div class="card" onclick="setAsset('CRYPTO', this)">💎 CRYPTO</div>
+        <div class="card active" onclick="setAsset('AUD/CAD', this)"><i>🇦🇺</i>AUD/CAD</div>
+        <div class="card" onclick="setAsset('EUR/USD', this)"><i>🇪🇺</i>EUR/USD</div>
+        <div class="card" onclick="setAsset('GBP/JPY', this)"><i>🇬🇧</i>GBP/JPY</div>
+        <div class="card" onclick="setAsset('CRYPTO', this)"><i>💎</i>CRYPTO</div>
     </div>
 
     <span class="u-label">Execution Time</span>
@@ -118,54 +120,38 @@
         <button class="btn-tf" onclick="setTF('1M', this)">1m</button>
     </div>
 
-    <button class="btn-main" id="main-btn" onclick="runNeural()">АНАЛІЗУВАТИ ІМПУЛЬС</button>
+    <button class="btn-main" onclick="runNeural()">АНАЛІЗУВАТИ ІМПУЛЬС</button>
 
     <div id="overlay">
-        <div id="loading-text" style="font-family:'Orbitron'; color:var(--neon); font-size:12px; letter-spacing:10px;">DEEP_SCAN</div>
+        <div id="overlay-loader">DEEP_SCAN</div>
         <div class="scan-line" id="line"></div>
-        
-        <div id="result">
-            <div id="dir">CALL</div>
-            <div class="badge" id="acc">99.4%</div>
-            <div style="margin-top:40px; font-size:10px; color:#222; letter-spacing:3px;">ORDER EXECUTION READY</div>
-            <button class="btn-main" style="background:transparent; border:1px solid #111; color:#fff; width:220px; margin-top:40px;" onclick="location.reload()">BACK</button>
-        </div>
+        <button class="btn-main" style="background:transparent; border:1px solid #111; color:#fff; width:220px; margin-top:100px; display:none;" id="back-btn" onclick="location.reload()">BACK</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         let currentExp = '5S';
         
-        // --- BG ANIMATION ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        let particles = [];
-        for(let i=0; i<40; i++) particles.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*2, d: Math.random()*0.5});
-        function drawBg() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = "#00ffaa";
-            particles.forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-                p.y -= p.d; if(p.y < 0) p.y = canvas.height;
-            });
-            requestAnimationFrame(drawBg);
+        // --- HFT METER як на скріншоті ---
+        const meter = document.getElementById('hft-meter');
+        for(let i=0; i<20; i++) {
+            let b = document.createElement('div');
+            b.className = 'bar';
+            b.style.height = '10%';
+            if(i % 3 === 0) b.style.background = 'var(--neon)';
+            else if(i % 3 === 1) b.style.background = 'var(--pink)';
+            else b.style.background = '#ff003c';
+            meter.appendChild(b);
         }
-        drawBg();
-
-        // --- HFT CHART ---
-        const chart = document.getElementById('chart');
-        for(let i=0; i<25; i++) {
-            let t = document.createElement('div'); t.className = 'tick'; t.style.height = '10%'; chart.appendChild(t);
-        }
+        
         setInterval(() => {
-            const ticks = document.querySelectorAll('.tick');
-            ticks.forEach(t => { t.style.height = (Math.random()*90 + 10) + '%'; t.style.background = Math.random() > 0.5 ? '#00ffaa' : '#ff3366'; });
-            const p = (0.91200 + Math.random()*0.0009).toFixed(5);
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(b => { b.style.height = (Math.random()*90 + 10) + '%'; });
+            const p = (0.91200 + Math.random()*0.00100).toFixed(5);
             document.getElementById('price').innerText = p;
         }, 800);
 
-        // --- FUNCTIONS ---
+        // --- FUNCTIONS з v40 ---
         function setAsset(n, e) {
             document.getElementById('snd-click').play();
             document.getElementById('active-asset').innerText = n + " (OTC)";
@@ -195,19 +181,11 @@
 
             document.getElementById('snd-process').pause();
             document.getElementById('snd-success').play();
-            document.getElementById('loading-text').style.display = 'none';
+            document.getElementById('overlay-loader').innerText = (Math.random() > 0.5 ? "CALL ↑" : "PUT ↓");
+            document.getElementById('overlay-loader').style.color = (document.getElementById('overlay-loader').innerText.includes("CALL") ? "var(--neon)" : "var(--pink)");
+            
             line.style.display = 'none';
-            
-            const res = document.getElementById('result');
-            res.style.display = 'block';
-
-            const isCall = Math.random() > 0.48;
-            const dirEl = document.getElementById('dir');
-            dirEl.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            dirEl.style.color = isCall ? "var(--neon)" : "var(--red)";
-            dirEl.style.textShadow = `0 0 50px ${isCall ? 'rgba(0,255,170,0.5)' : 'rgba(255,51,102,0.5)'}`;
-            
-            document.getElementById('acc').innerText = (96.8 + Math.random()*2.9).toFixed(1) + "%";
+            document.getElementById('back-btn').style.display = 'block';
             tg.HapticFeedback.notificationOccurred('success');
         }
     </script>
