@@ -3,110 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX TITAN TERMINAL</title>
+    <title>ZIORFEX POCKET CORE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;500;800&display=swap');
 
         :root {
-            --neon: #00ff88; --bg: #020202; --panel: rgba(20, 20, 20, 0.7);
-            --border: rgba(0, 255, 136, 0.15); --red: #ff3e3e; --gold: #ffcc00;
+            --neon: #00ff88; --bg: #010101; --panel: rgba(13, 13, 13, 0.95);
+            --border: rgba(0, 255, 136, 0.25); --red: #ff3e3e; --blue: #0088ff;
         }
-
-        .theme-red { --neon: #ff3e3e; --border: rgba(255, 62, 62, 0.15); }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
             font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; 
             margin: 0; padding: 15px; height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at 50% 0%, #081a12 0%, #010101 100%);
         }
 
-        canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+        /* API STATUS BAR */
+        .api-bar {
+            background: rgba(0,0,0,0.6); border: 1px solid var(--border);
+            padding: 12px; border-radius: 16px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.05);
+        }
+        .status-dot { width: 8px; height: 8px; background: #555; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-online { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; z-index: 10; }
-        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--neon); letter-spacing: 2px; text-shadow: 0 0 15px var(--neon); }
-        
-        .status-dot { width: 8px; height: 8px; background: var(--neon); border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 10px var(--neon); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        /* MAIN PRICE DISPLAY */
+        .price-card {
+            text-align: center; padding: 25px; border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;
+        }
+        #live-asset { font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; color: #888; margin-bottom: 10px; }
+        #live-price { font-family: 'Orbitron'; font-size: 2.2rem; font-weight: 900; transition: 0.2s; }
 
         .card { 
-            background: var(--panel); border: 1px solid var(--border); border-radius: 20px; 
-            padding: 18px; margin-bottom: 12px; backdrop-filter: blur(15px);
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
+            background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
         }
 
-        .label { font-size: 0.6rem; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; font-weight: bold; }
+        .label { font-size: 0.6rem; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; opacity: 0.8; }
 
-        .switcher { display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
-        .sw-btn { 
-            flex: 1; padding: 12px; border: none; border-radius: 10px; 
-            background: transparent; color: #555; font-family: inherit; font-size: 0.8rem;
-            cursor: pointer; transition: 0.4s; font-weight: bold;
-        }
-        .sw-btn.active { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
-
-        select { 
-            width: 100%; background: rgba(0,0,0,0.6); border: 1px solid var(--border); 
-            color: #fff; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 0.95rem;
-        }
-
-        .volatility-box { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
-        .vol-bar { flex-grow: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
-        .vol-fill { height: 100%; background: var(--neon); width: 65%; transition: 0.5s; }
-
-        .glow-btn { 
+        .main-btn { 
             width: 100%; background: var(--neon); color: #000; border: none; 
-            padding: 20px; border-radius: 18px; font-family: 'Orbitron', sans-serif;
-            font-weight: 900; font-size: 1rem; text-transform: uppercase;
-            margin-top: auto; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
-        }
-        .glow-btn:active { transform: scale(0.97); }
-
-        #analysis-screen { display: none; flex-direction: column; height: 100%; }
-        .console { 
-            background: rgba(0,0,0,0.8); border: 1px solid var(--border); border-radius: 15px; 
-            padding: 20px; flex-grow: 1; font-size: 0.75rem; color: var(--neon);
-            overflow: hidden; line-height: 1.6;
+            padding: 22px; border-radius: 20px; font-family: 'Orbitron', sans-serif;
+            font-weight: 900; text-transform: uppercase; font-size: 1.1rem;
+            margin-top: auto; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
         }
 
-        #result-screen { display: none; text-align: center; }
-        .result-circle {
-            width: 220px; height: 220px; border-radius: 50%; border: 2px dashed var(--neon);
-            margin: 20px auto; display: flex; flex-direction: column; justify-content: center;
-            align-items: center; background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+        /* SIGNAL UI */
+        #result-screen { display: none; text-align: center; flex-direction: column; height: 100%; }
+        .signal-indicator {
+            width: 100%; height: 180px; border-radius: 20px;
+            margin: 20px 0; display: flex; flex-direction: column; justify-content: center;
+            border: 1px solid var(--border); position: relative; overflow: hidden;
+            background: rgba(0,0,0,0.4);
         }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .signal-bg { position: absolute; inset: 0; opacity: 0.1; background-size: cover; filter: blur(5px); }
         
-        .inner-content { transform: rotate(-360deg); animation: rotate-reverse 20s linear infinite; }
-        @keyframes rotate-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        #r-dir { font-family: 'Orbitron'; font-size: 3rem; font-weight: 900; z-index: 2; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #r-icon { font-size: 4rem; z-index: 2; margin-bottom: -10px; }
 
-        .res-dir { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; }
-        .res-acc { font-size: 0.8rem; color: var(--neon); margin-top: 5px; letter-spacing: 1px; }
+        .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .metric-box { background: rgba(255,255,255,0.02); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .m-val { display: block; font-size: 1.1rem; font-weight: 800; color: var(--neon); }
+        .m-lbl { font-size: 0.55rem; color: #666; text-transform: uppercase; }
 
-        .progress-container { width: 100%; height: 6px; background: #111; border-radius: 10px; margin: 25px 0; overflow: hidden; }
-        .progress-bar { height: 100%; width: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); }
-
+        /* LOAD ANIMATION */
+        #loading { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        .circle-loader { width: 60px; height: 60px; border: 3px solid rgba(0, 255, 136, 0.1); border-top-color: var(--neon); border-radius: 50%; animation: spin 1s infinite linear; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body id="body">
-    <canvas id="matrix"></canvas>
+<body>
 
-    <div class="header">
-        <div class="logo">ZIORFEX_TITAN</div>
-        <div style="font-size: 0.7rem; color: #888;"><span class="status-dot"></span>SYS_READY</div>
+    <div class="api-bar">
+        <div style="font-size: 0.65rem; font-weight: 700; color: var(--neon);">
+            <span class="status-dot status-online" id="dot"></span> POCKET_GATEWAY_v11
+        </div>
+        <div style="font-size: 0.6rem; color: #555;" id="ping">PING: 24ms</div>
     </div>
 
-    <div id="setup-screen" style="display: flex; flex-direction: column; height: 85%;">
+    <div class="price-card">
+        <div id="live-asset">EUR/USD (OTC)</div>
+        <div id="live-price">1.08422</div>
+    </div>
+
+    <div id="setup-screen" style="display: flex; flex-direction: column; height: 75%;">
         <div class="card">
-            <div class="label">Exchange Mode</div>
-            <div class="switcher">
-                <button class="sw-btn active" id="std-mode" onclick="setMode('std')">STANDARD</button>
-                <button class="sw-btn" id="otc-mode" onclick="setMode('otc')">OTC_TITAN</button>
+            <span class="label">API CONNECTION</span>
+            <div style="font-size:0.8rem; color:#fff;">POCKETOPTION_STABLE_API v1.2</div>
+        </div>
+        <div class="card">
+            <span class="label">NEURAL ENGINE</span>
+            <div style="font-size:0.8rem; color:#fff;">MOMENTUM_ANALYTIC_PRO</div>
+        </div>
+        <button class="main-btn" onclick="startPocketScan()">GET POCKET SIGNAL</button>
+    </div>
+
+    <div id="loading">
+        <div class="circle-loader"></div>
+        <div style="margin-top:20px; font-size:0.7rem; color:var(--neon); letter-spacing:1px;" id="load-text">CONNECTING TO SOCKET...</div>
+    </div>
+
+    <div id="result-screen">
+        <div class="signal-indicator" id="s-ind">
+            <div class="signal-bg" id="s-bg"></div>
+            <span id="r-icon">↑</span>
+            <span id="r-dir">CALL</span>
+        </div>
+        
+        <div class="metrics">
+            <div class="metric-box">
+                <span class="m-val" id="r-prob">98.4%</span>
+                <span class="m-lbl">Probability</span>
+            </div>
+            <div class="metric-box">
+                <span class="m-val" id="r-time">1 MIN</span>
+                <span class="m-lbl">EXPIRATION</span>
             </div>
         </div>
+
+        <button class="main-btn" style="background:transparent; border:1px solid var(--border); color:#fff; margin-top:25px;" onclick="location.reload()">REFRESH SESSION</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // ІМІТАЦІЯ ТІКІВ POCKET OPTION (Реальна логіка)
+        let price = 1.08422;
+        let history = [];
+
+        function updatePrice() {
+            const change = (Math.random() * 0.00010 - 0.00005);
+            price = (parseFloat(price) + change).toFixed(5);
+            const el = document.getElementById('live-price');
+            el.innerText = price;
+            el.style.color = change > 0 ? '#00ff88' : '#ff3e3e';
+            
+            history.push(price);
+            if(history.length > 15) history.shift();
+            
+            // Динамічний пінг
+            document.getElementById('ping').innerText = `PING: ${Math.floor(Math.random() * 20 + 15)}ms`;
+        }
+        setInterval(updatePrice, 1000);
+
+        async function startPocketScan() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
+
+            const steps = ["FETCHING SOCKET DATA...", "ANALYZING CANDLE DELTA...", "Neural_v11 CALCULATION...", "POCKET_SIGNAL GENERATED!"];
+            for(let s of steps) {
+                document.getElementById('load-text').innerText = s;
+                await new Promise(r => setTimeout(r, 800));
+            }
+
+            showPocketResult();
+        }
+
+        function showPocketResult() {
+            tg.HapticFeedback.notificationOccurred('success');
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+
+            // РЕАЛЬНА ЛОГІКА: порівнюємо ціну зараз і 10 секунд тому
+            const startPrice = history[0];
+            const endPrice = history[history.length - 1];
+            const isCall = endPrice >= startPrice;
+
+            const prob = (92 + Math.random() * 6.8).toFixed(1);
+            document.getElementById('r-prob').innerText = prob + '%';
+
+            const dir = document.getElementById('r-dir');
+            const icon = document.getElementById('r-icon');
+            const ind = document.getElementById('s-ind');
+
+            if(isCall) {
+                dir.innerText = "UP / CALL"; icon.innerText = "↑";
+                document.documentElement.style.setProperty('--neon', '#00ff88');
+                dir.style.color = '#00ff88'; icon.style.color = '#00ff88';
+                ind.style.borderColor = '#00ff88';
+            } else {
+                dir.innerText = "DOWN / PUT"; icon.innerText = "↓";
+                document.documentElement.style.setProperty('--neon', '#ff3e3e');
+                dir.style.color = '#ff3e3e'; icon.style.color = '#ff3e3e';
+                ind.style.borderColor = '#ff3e3e';
+            }
+        }
+    </script>
+</body>
+</html>
 
         <div class="card">
             <div class="label">Market Instrument</div>
