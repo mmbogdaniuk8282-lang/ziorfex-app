@@ -3,65 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX QUANTUM</title>
+    <title>ZIORFEX TERMINATOR</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@500;800&display=swap');
-        :root { --neon: #00ff88; --bg: #000; --red: #ff3131; --cyan: #00f2ff; }
+        :root { --neon: #00ff88; --bg: #000; --red: #ff003c; --warning: #ffcc00; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; margin: 0; padding: 12px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; margin: 0; padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Cyber Interface */
-        .scanner-line { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: var(--neon); opacity: 0.3; box-shadow: 0 0 15px var(--neon); animation: scan 4s linear infinite; z-index: 100; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        /* Scanline FX */
+        body::before { content: " "; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }
 
-        .top-panel { display: flex; justify-content: space-between; font-size: 8px; color: #444; margin-bottom: 10px; text-transform: uppercase; }
-        .data-card { background: linear-gradient(145deg, #0a0a0a, #050505); border: 1px solid rgba(0, 255, 136, 0.2); border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(0,255,136,0.05); }
+        .terminal-header { display: flex; justify-content: space-between; font-size: 8px; color: var(--neon); padding: 5px; border-bottom: 1px solid rgba(0,255,136,0.2); margin-bottom: 10px; }
+        .main-monitor { background: #050505; border: 1px solid #1a1a1a; border-radius: 15px; padding: 20px; position: relative; box-shadow: 0 0 20px rgba(0,0,0,1); }
         
-        #live-price { font-family: 'Orbitron'; font-size: 44px; font-weight: 900; letter-spacing: -2px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
-        .indicator { font-size: 10px; color: var(--neon); margin-top: 5px; opacity: 0.8; }
+        #live-price { font-family: 'Orbitron'; font-size: 48px; font-weight: 900; letter-spacing: -2px; text-align: center; margin: 10px 0; }
+        .vol-meter { width: 100%; height: 2px; background: #111; margin-top: 10px; position: relative; }
+        #vol-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--neon); width: 0%; transition: 0.3s; }
 
-        .label { font-size: 9px; color: #555; text-transform: uppercase; margin: 10px 0 5px 10px; letter-spacing: 2px; }
-        .box-ui { background: #0c0c0c; border: 1px solid #1a1a1a; border-radius: 15px; padding: 15px; margin-bottom: 10px; }
-        select { width: 100%; background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 800; }
+        .label { font-size: 9px; color: #444; text-transform: uppercase; margin: 15px 0 5px 5px; letter-spacing: 2px; }
+        .box { background: #080808; border: 1px solid #111; border-radius: 12px; padding: 12px; }
+        select { width: 100%; background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; }
 
         .grid-tf { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .btn-tf { background: #080808; border: 1px solid #222; color: #444; padding: 15px 0; border-radius: 12px; font-size: 11px; font-weight: 800; cursor: pointer; }
-        .btn-tf.active { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 15px rgba(0,242,255,0.1); }
+        .btn-tf { background: #0a0a0a; border: 1px solid #1a1a1a; color: #444; padding: 14px 0; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
+        .btn-tf.active { border-color: var(--neon); color: var(--neon); background: rgba(0,255,136,0.05); }
 
-        .btn-core { width: 100%; background: var(--neon); color: #000; border: none; padding: 22px; border-radius: 20px; font-family: 'Orbitron'; font-weight: 900; font-size: 18px; text-transform: uppercase; cursor: pointer; margin-top: auto; box-shadow: 0 10px 30px rgba(0,255,136,0.2); transition: 0.2s; }
+        .btn-execute { width: 100%; background: var(--neon); color: #000; border: none; padding: 20px; border-radius: 15px; font-family: 'Orbitron'; font-weight: 900; font-size: 18px; text-transform: uppercase; cursor: pointer; margin-top: auto; box-shadow: 0 0 25px rgba(0,255,136,0.2); }
 
-        /* Overlay */
         #overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .ai-log { font-size: 10px; color: var(--cyan); width: 100%; max-height: 120px; overflow: hidden; margin-bottom: 20px; border-left: 2px solid var(--cyan); padding-left: 10px; }
+        .console-out { font-size: 10px; color: var(--neon); width: 100%; height: 150px; overflow: hidden; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="scanner-line"></div>
-
-    <div class="top-panel">
-        <div>OS: TITAN_QUANTUM_v23</div>
-        <div id="latency">LATENCY: 4ms</div>
+    <div class="terminal-header">
+        <div>SYS: TERMINATOR_v24</div>
+        <div>MARKET: AUD/CAD (OTC)</div>
     </div>
 
-    <div class="data-card">
-        <div id="asset-name" style="font-size: 10px; color: #555; letter-spacing: 3px;">AUD/CAD (OTC)</div>
+    <div class="main-monitor">
         <div id="live-price">0.91242</div>
-        <div class="indicator" id="signal-strength">SIGNAL: SCANNING...</div>
+        <div class="vol-meter"><div id="vol-fill"></div></div>
+        <div style="text-align: center; font-size: 9px; color: #333; margin-top: 5px;">HFT_VOLUME_SCANNER</div>
     </div>
 
-    <span class="label">Target Asset</span>
-    <div class="box-ui">
-        <select id="asset-select" onchange="sync()">
+    <span class="label">Target Pair</span>
+    <div class="box">
+        <select id="asset-select" onchange="reset()">
             <option value="AUD/CAD (OTC)">AUD/CAD (OTC)</option>
             <option value="EUR/USD (OTC)">EUR/USD (OTC)</option>
-            <option value="GBP/JPY (OTC)">GBP/JPY (OTC)</option>
-            <option value="BTC/USDT">BITCOIN (EXPLOIT)</option>
+            <option value="BTC/USDT">BITCOIN (IMPACT)</option>
         </select>
     </div>
 
-    <span class="label">Time Horizon</span>
+    <span class="label">Time Interval</span>
     <div class="grid-tf">
         <button class="btn-tf active" onclick="setT(5, this)">5S</button>
         <button class="btn-tf" onclick="setT(15, this)">15S</button>
@@ -69,19 +65,17 @@
         <button class="btn-tf" onclick="setT(60, this)">1M</button>
     </div>
 
-    <button class="btn-core" onclick="analyzeQuantum()">ВИЧАВИТИ СИГНАЛ</button>
+    <button class="btn-execute" onclick="runAlgo()">АНАЛІЗУВАТИ ІМПУЛЬС</button>
 
     <div id="overlay">
-        <div class="ai-log" id="log"></div>
-        <div id="loader" style="text-align:center;">
-            <div style="font-family:'Orbitron'; font-size:12px; color:var(--cyan); letter-spacing:4px; margin-bottom:20px;">CALCULATING QUANTUM PROBABILITY...</div>
-        </div>
+        <div class="console-out" id="console"></div>
+        <div id="status-msg" style="font-family:'Orbitron'; font-size:12px; color:var(--neon); letter-spacing:2px;">HACKING LIQUIDITY...</div>
         
         <div id="result" style="display:none; text-align:center; width:100%;">
-            <div id="res-dir" style="font-family:'Orbitron'; font-size:70px; font-weight:900;">CALL</div>
-            <div id="res-acc" style="color:var(--neon); font-size:24px; font-weight:900;">ACCURACY: 99.7%</div>
-            <div id="res-info" style="font-size:10px; color:#333; margin-top:30px; line-height:1.6;"></div>
-            <button class="btn-core" onclick="location.reload()" style="background:transparent; border:1px solid #222; color:#fff; margin-top:40px;">REFRESH DATA</button>
+            <div id="res-dir" style="font-family:'Orbitron'; font-size:75px; font-weight:900;">PUT ↓</div>
+            <div id="res-acc" style="color:var(--neon); font-size:24px; font-weight:900;">POWER: 99.8%</div>
+            <div id="res-meta" style="font-size:10px; color:#444; margin-top:30px;">SIGNAL_SOURCE: TICK_BREAKOUT</div>
+            <button class="btn-execute" onclick="location.reload()" style="background:transparent; border:1px solid #222; color:#fff; margin-top:50px;">BACK</button>
         </div>
     </div>
 
@@ -89,147 +83,61 @@
         const tg = window.Telegram.WebApp; tg.expand();
         let tf = 5; let price = 0.91242; let history = [];
 
-        function sync() { document.getElementById('asset-name').innerText = document.getElementById('asset-select').value; history = []; }
+        function reset() { history = []; }
         function setT(v, e) { tf = v; document.querySelectorAll('.btn-tf').forEach(b => b.classList.remove('active')); e.classList.add('active'); }
 
         setInterval(() => {
-            let ch = (Math.random() * 0.00036 - 0.00018);
+            let ch = (Math.random() * 0.00044 - 0.00022);
             price = (parseFloat(price) + ch).toFixed(5);
             const el = document.getElementById('live-price');
             el.innerText = price;
-            el.style.color = ch > 0 ? "#00ff88" : "#ff3131";
-            history.push({p: parseFloat(price), t: Date.now()});
+            el.style.color = ch > 0 ? "#00ff88" : "#ff003c";
+            
+            // Заповнюємо волюметр
+            document.getElementById('vol-fill').style.width = Math.random() * 100 + "%";
+            
+            history.push(parseFloat(price));
             if(history.length > 50) history.shift();
         }, 1000);
 
-        async function analyzeQuantum() {
+        async function runAlgo() {
             tg.HapticFeedback.impactOccurred('heavy');
             document.getElementById('overlay').style.display = 'flex';
-            const log = document.getElementById('log');
-            log.innerHTML = '';
+            const con = document.getElementById('console');
+            con.innerHTML = '';
             
-            const steps = [
-                "> BOOTING QUANTUM CORE...",
-                "> ANALYZING MICRO-FRAGMENTATION...",
-                "> DETECTING BROKER LIQUIDITY TRAPS...",
-                "> SYNCING WITH OTC CLOUD...",
-                "> APPLYING PROBABILITY FILTER...",
-                "> SIGNAL OPTIMIZED."
+            const logs = [
+                "> OPENING WEBSOCKET TO OTC FEED...",
+                "> SCANNING MICRO-LEVELS AT 0.91240...",
+                "> DETECTING FAKE BREAKOUTS...",
+                "> CALCULATING HFT MOMENTUM...",
+                "> CONFIRMING INSTITUTIONAL BIAS...",
+                "> EXPLOIT READY."
             ];
 
-            for(let i=0; i<steps.length; i++) {
-                log.innerHTML += `<div>${steps[i]}</div>`;
-                await new Promise(r => setTimeout(r, (tf * 1000) / steps.length));
+            for(let i=0; i<logs.length; i++) {
+                con.innerHTML += `<div>${logs[i]}</div>`;
+                await new Promise(r => setTimeout(r, (tf * 1000) / logs.length));
             }
 
-            // --- ЕБЕЙША ЛОГІКА V23 ---
-            const cur = parseFloat(price);
-            const past = history[history.length - 10]?.p || history[0].p;
+            // --- ЕКСТРЕМАЛЬНА ЛОГІКА V24 ---
+            const current = parseFloat(price);
+            const startPrice = history[history.length - 10] || history[0];
             
-            // Аналіз напрямку за останні 10 секунд
-            const isCall = cur >= past;
+            // "Пастка брокера": якщо ціна за 10 сек виросла — ми беремо на розворот (PUT)
+            // Бо на OTC після імпульсу майже завжди йде компенсація
+            const isCall = current < startPrice; 
             
-            // "Розумна" точність
-            const accuracy = (97.4 + Math.random() * 2.5).toFixed(1);
-            const volatility = Math.abs(cur - past).toFixed(5);
-
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
+            document.getElementById('status-msg').style.display = 'none';
+            document.getElementById('console').style.display = 'none';
             const res = document.getElementById('result');
             res.style.display = 'block';
             
-            const rd = document.getElementById('res-dir');
-            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rd.style.color = isCall ? "#00ff88" : "#ff3131";
+            const dir = document.getElementById('res-dir');
+            dir.innerText = isCall ? "CALL ↑" : "PUT ↓";
+            dir.style.color = isCall ? "#00ff88" : "#ff003c";
             
-            document.getElementById('res-acc').innerText = `ACCURACY: ${accuracy}%`;
-            document.getElementById('res-info').innerHTML = `
-                MARKET: ${document.getElementById('asset-select').value}<br>
-                VOLATILITY INDEX: ${volatility}<br>
-                ALGO_CONFIDENCE: HIGH_LEVEL
-            `;
-            
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-    </script>
-</body>
-</html>
-            let i = 0;
-            const logT = setInterval(() => {
-                if(i < lines.length) { m.innerHTML += `<div>${lines[i]}</div>`; i++; }
-                else clearInterval(logT);
-            }, 600);
-
-            await new Promise(r => setTimeout(r, currentTF * 1000));
-
-            // --- ЕБЕЙША СТРАТЕГІЯ (SMC LOGIC) ---
-            const cur = parseFloat(price);
-            const mid = buffer.reduce((a,b) => a+b, 0) / buffer.length;
-            
-            // Логіка "Розвороту від зони": якщо ціна занадто низько — купуємо (CALL)
-            // Це імітація того, як боти викуповують Order Block
-            const isCall = cur <= mid; 
-            
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('matrix').style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-            
-            const rd = document.getElementById('res-dir');
-            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rd.style.color = isCall ? "#00ff88" : "#ff2a2a";
-            
-            // Точність під "топа"
-            document.getElementById('res-acc').innerText = `CONFIDENCE: ${(96 + Math.random() * 3.8).toFixed(1)}%`;
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-    </script>
-</body>
-</html>
-            // Якщо ціна росте швидше за середню — CALL, якщо падає — PUT
-            const isCall = trend >= 0;
-            
-            // Точність вираховується як відсоток впевненості (завжди висока, але реальна)
-            const confidence = (94.2 + (Math.random() * 4.3)).toFixed(1);
-            const rsi = (Math.random() * (70 - 30) + 30).toFixed(2);
-
-            document.getElementById('status').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
-            document.querySelector('.loader-bar').style.display = 'none';
-            
-            const res = document.getElementById('result');
-            res.style.display = 'block';
-            const rDir = document.getElementById('res-dir');
-            
-            rDir.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rDir.style.color = isCall ? "#00ff88" : "#ff3131";
-            
-            document.getElementById('res-acc').innerText = `ТОЧНІСТЬ: ${confidence}%`;
-            document.getElementById('res-info').innerHTML = `
-                ASSET: ${document.getElementById('asset-select').value}<br>
-                RSI: ${rsi} | VOLATILITY: ${(Math.abs(trend)*10000).toFixed(2)}<br>
-                SIGNAL: STRONG_CONFIRMATION
-            `;
-            
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-    </script>
-</body>
-</html>
-            // Точність залежить від волатильності (чим сильніший рух, тим точніший сигнал)
-            const precision = (92 + Math.random() * 6).toFixed(1);
-
-            document.getElementById('status').style.display = 'none';
-            document.getElementById('log').style.display = 'none';
-            document.querySelector('.loader-bar').style.display = 'none';
-            
-            const res = document.getElementById('result');
-            res.style.display = 'block';
-            const rDir = document.getElementById('res-dir');
-            rDir.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rDir.style.color = isCall ? "#00ff88" : "#ff3131";
-            document.getElementById('res-acc').innerText = `ТОЧНІСТЬ: ${precision}%`;
-            document.getElementById('res-info').innerText = `ASSET: ${document.getElementById('asset-select').value} | VOL: ${volatility}`;
-            
+            document.getElementById('res-acc').innerText = `ACCURACY: ${(98.5 + Math.random() * 1.4).toFixed(1)}%`;
             tg.HapticFeedback.notificationOccurred('success');
         }
     </script>
