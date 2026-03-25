@@ -3,183 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX COSMOS</title>
+    <title>ZIORFEX POCKET EXPLOIT</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap');
         
-        :root { --neon: #00f2ff; --pink: #ff00cc; --bg: #020205; }
+        :root {
+            --bg: #010103; --card: #08080a; 
+            --neon: #00ff88; --sub: #222; --text: #fff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body { 
-            margin: 0; padding: 15px; background: var(--bg); color: #fff;
+            margin: 0; padding: 15px; background: var(--bg); color: var(--text);
             font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
             display: flex; flex-direction: column;
         }
 
-        /* Анімований космічний фон */
-        #stars { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #0a0a20 0%, #020205 100%); }
-        .star { position: absolute; background: #fff; border-radius: 50%; opacity: 0.5; animation: move 10s linear infinite; }
-        @keyframes move { from { transform: translateY(0); } to { transform: translateY(100vh); } }
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 3px; z-index: 999; pointer-events: none; }
 
-        /* Asset Selection - Пиздатий вигляд */
-        .asset-container {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 20px; padding: 20px; backdrop-filter: blur(10px); margin-bottom: 20px;
+        /* Monitor */
+        .monitor { background: var(--card); border-radius: 24px; padding: 25px; text-align: center; margin-bottom: 20px; border: 1px solid #111; box-shadow: var(--shadow); }
+        #price { font-family: 'Orbitron'; font-size: 48px; font-weight: 900; letter-spacing: -2px; }
+
+        .u-label { font-size: 9px; color: var(--neon); text-transform: uppercase; margin: 10px 0 8px 10px; letter-spacing: 2px; display: block; }
+
+        /* Asset Scroller */
+        .asset-box { position: relative; background: #000; border-radius: 18px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; }
+        .scroller { display: flex; gap: 10px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; width: 100%; }
+        .scroller::-webkit-scrollbar { display: none; }
+        .asset-card {
+            min-width: 110px; background: #0a0a0c; border: 1px solid #151515; padding: 15px;
+            border-radius: 14px; text-align: center; font-size: 11px; font-weight: 800; color: #444; transition: 0.2s;
         }
-        select {
-            width: 100%; background: transparent; border: none; color: var(--neon);
-            font-family: 'Orbitron'; font-size: 18px; font-weight: 900; text-align: center; cursor: pointer;
+        .asset-card.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px rgba(0,255,136,0.15); text-shadow: 0 0 5px var(--neon); }
+
+        /* Timeframe Selection (Час угоди) */
+        .tf-box { background: #000; border-radius: 18px; padding: 12px; margin-bottom: 20px; }
+        .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .tf-btn {
+            background: #0a0a0c; border: 1px solid #151515; color: #444; padding: 16px 0;
+            border-radius: 12px; font-size: 12px; font-weight: 900; cursor: pointer; transition: 0.2s;
+        }
+        .tf-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px rgba(0,255,136,0.1); }
+
+        /* Main Button */
+        .btn-main {
+            width: 100%; background: var(--neon); color: #000; border: none; padding: 24px;
+            border-radius: 20px; font-family: 'Orbitron'; font-weight: 900; font-size: 18px;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(0,255,136,0.2); margin-top: auto;
         }
 
-        /* Головний монітор з ціною */
-        .monitor { text-align: center; margin-bottom: 20px; position: relative; }
-        #price { font-family: 'Orbitron'; font-size: 50px; font-weight: 900; text-shadow: 0 0 20px var(--neon); }
+        /* Overlay */
+        #overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        .loading-line { width: 100%; height: 3px; background: var(--neon); position: absolute; top: 50%; transform: scaleX(0); transition: 5s linear; box-shadow: 0 0 20px var(--neon); }
         
-        /* КАНВАС ДЛЯ АНІМАЦІЇ ЛІНІЇ */
-        #chartCanvas {
-            width: 100%; height: 120px; background: rgba(0,0,0,0.2);
-            border-radius: 15px; border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-        }
-
-        /* Кнопка */
-        .btn-launch {
-            width: 100%; padding: 25px; border-radius: 20px; border: none;
-            background: linear-gradient(45deg, var(--neon), var(--pink));
-            color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 20px;
-            cursor: pointer; box-shadow: 0 0 30px rgba(0, 242, 255, 0.4); margin-top: auto;
-        }
-
-        /* Оверлей результату */
-        #overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-            z-index: 100; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px);
-        }
-        #sig-line { width: 100%; height: 4px; background: var(--neon); position: absolute; top: 50%; transform: scaleX(0); transition: 1.5s ease-in-out; box-shadow: 0 0 20px var(--neon); }
-        
-        .music-toggle { position: fixed; top: 10; right: 10; font-size: 20px; cursor: pointer; z-index: 10; opacity: 0.5; }
+        #result { display: none; text-align: center; width: 100%; }
+        #res-dir { font-family: 'Orbitron'; font-size: 90px; font-weight: 900; }
+        .acc-badge { padding: 8px 20px; border-radius: 30px; background: rgba(0,255,136,0.1); color: var(--neon); font-weight: 800; font-size: 18px; display: inline-block; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div id="stars"></div>
-    <div class="music-toggle" onclick="toggleMusic()">🎵</div>
-
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
-    </audio>
+    <div class="scanlines"></div>
 
     <div class="monitor">
-        <div style="font-size: 10px; color: var(--neon); letter-spacing: 5px;">DEEP SPACE ANALYZER</div>
+        <div id="asset-name" style="font-size: 10px; color: #333; letter-spacing: 3px; margin-bottom: 5px;">AUD/CAD (OTC)</div>
         <div id="price">0.91242</div>
-        <canvas id="chartCanvas"></canvas>
     </div>
 
-    <div class="asset-container">
-        <div style="font-size: 9px; color: #555; margin-bottom: 10px;">TARGET SELECTION</div>
-        <select id="asset-select">
-            <option value="AUD/CAD (OTC)">🌕 AUD/CAD (OTC)</option>
-            <option value="EUR/USD (OTC)">🇪🇺 EUR/USD (OTC)</option>
-            <option value="BTC/USDT">💎 BITCOIN / USDT</option>
-            <option value="GOLD (OTC)">🏆 XAU/USD (GOLD)</option>
-        </select>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <div class="asset-container" style="margin:0; padding:10px;">
-            <div style="font-size: 8px;">TIMEFRAME</div>
-            <select id="tf" style="font-size: 14px;"><option>M1</option><option>S15</option><option>S5</option></select>
-        </div>
-        <div class="asset-container" style="margin:0; padding:10px;">
-            <div style="font-size: 8px;">ALGO MODE</div>
-            <div style="color:var(--pink); font-size: 12px; font-weight: 900; margin-top:5px;">NEURAL X</div>
+    <span class="u-label">Валютна пара</span>
+    <div class="asset-box">
+        <div class="scroller" id="scroller">
+            <div class="asset-card active" onclick="setAsset('AUD/CAD', this)">AUD/CAD</div>
+            <div class="asset-card" onclick="setAsset('EUR/USD', this)">EUR/USD</div>
+            <div class="asset-card" onclick="setAsset('GBP/JPY', this)">GBP/JPY</div>
+            <div class="asset-card" onclick="setAsset('USD/CHF', this)">USD/CHF</div>
+            <div class="asset-card" onclick="setAsset('CRYPTO', this)">CRYPTO</div>
         </div>
     </div>
 
-    <button class="btn-launch" onclick="launchSignal()">GENERATE SIGNAL</button>
+    <span class="u-label">Час угоди (Expiration)</span>
+    <div class="tf-box">
+        <div class="tf-grid">
+            <button class="tf-btn active" onclick="setExp('5S', this)">5s</button>
+            <button class="tf-btn" onclick="setExp('15S', this)">15s</button>
+            <button class="tf-btn" onclick="setExp('30S', this)">30s</button>
+            <button class="tf-btn" onclick="setExp('1M', this)">1m</button>
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="startAnalysis()">АНАЛІЗУВАТИ ІМПУЛЬС</button>
 
     <div id="overlay">
-        <div id="sig-line"></div>
-        <div id="loader-text" style="font-family:'Orbitron'; color:var(--neon); font-size:14px; letter-spacing:5px;">ANALYZING VECTORS...</div>
+        <div class="loading-line" id="line"></div>
+        <div id="status" style="font-family:'Orbitron'; color:var(--neon); font-size:12px; letter-spacing:5px;">SCANNING...</div>
         
-        <div id="result" style="display:none; text-align:center;">
-            <div id="res-dir" style="font-family:'Orbitron'; font-size:80px; font-weight:900;">CALL</div>
-            <div style="font-size:24px; color:var(--neon); font-weight:900;" id="res-acc">99.2%</div>
-            <button class="btn-launch" style="background:transparent; border:1px solid #333; color:#fff; margin-top:50px; width:200px;" onclick="location.reload()">AGAIN</button>
+        <div id="result">
+            <div id="res-dir">CALL</div>
+            <div class="acc-badge" id="res-acc">98.2%</div>
+            <div style="margin-top:40px; color:#333; font-size:10px;">EXPIRATION: <span id="res-exp" style="color:var(--neon)">5S</span></div>
+            <button class="btn-main" style="background:transparent; border:1px solid #222; color:#fff; width:200px; margin-top:40px;" onclick="location.reload()">НАЗАД</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        const canvas = document.getElementById('chartCanvas');
-        const ctx = canvas.getContext('2d');
-        let points = [];
-
-        // Створення зірок
-        for(let i=0; i<50; i++) {
-            let s = document.createElement('div');
-            s.className = 'star';
-            s.style.width = Math.random()*3+'px';
-            s.style.height = s.style.width;
-            s.style.left = Math.random()*100+'vw';
-            s.style.top = Math.random()*100+'vh';
-            s.style.animationDuration = (Math.random()*5+5)+'s';
-            document.getElementById('stars').appendChild(s);
-        }
-
-        // Анімація графіка (хвиля)
-        function draw() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.strokeStyle = '#00f2ff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            points.push(Math.random()*40 + 40);
-            if(points.length > 50) points.shift();
-            for(let i=0; i<points.length; i++) {
-                ctx.lineTo(i*(canvas.width/50), points[i]);
-            }
-            ctx.stroke();
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        function toggleMusic() {
-            const m = document.getElementById('bgMusic');
-            if(m.paused) m.play(); else m.pause();
-        }
-
-        async function launchSignal() {
-            tg.HapticFeedback.impactOccurred('heavy');
-            document.getElementById('overlay').style.display = 'flex';
-            const line = document.getElementById('sig-line');
-            const res = document.getElementById('result');
-            const loader = document.getElementById('loader-text');
-
-            // Анімація лінії як у відео
-            setTimeout(() => { line.style.transform = 'scaleX(1)'; }, 100);
-
-            await new Promise(r => setTimeout(r, 2500));
-
-            line.style.display = 'none';
-            loader.style.display = 'none';
-            res.style.display = 'block';
-
-            const isCall = Math.random() > 0.45;
-            const rd = document.getElementById('res-dir');
-            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rd.style.color = isCall ? "#00ff88" : "#ff003c";
-            rd.style.textShadow = `0 0 30px ${isCall ? '#00ff88' : '#ff003c'}`;
-            
-            document.getElementById('res-acc').innerText = `STABILITY: ${(96 + Math.random()*3.9).toFixed(1)}%`;
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        // Авто-ціна
+        let currentExp = '5S';
+        
+        // Live Price
         setInterval(() => {
             let p = (0.91200 + Math.random()*0.0009).toFixed(5);
             document.getElementById('price').innerText = p;
         }, 1000);
+
+        function setAsset(name, el) {
+            document.getElementById('asset-name').innerText = name + " (OTC)";
+            document.querySelectorAll('.asset-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function setExp(val, el) {
+            currentExp = val;
+            document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        async function startAnalysis() {
+            tg.HapticFeedback.impactOccurred('heavy');
+            document.getElementById('overlay').style.display = 'flex';
+            const line = document.getElementById('line');
+            
+            // Анімація завжди 5 секунд
+            setTimeout(() => { line.style.transform = 'scaleX(1)'; }, 100);
+
+            await new Promise(r => setTimeout(r, 5000));
+
+            document.getElementById('status').style.display = 'none';
+            line.style.display = 'none';
+            const res = document.getElementById('result');
+            res.style.display = 'block';
+
+            const isCall = Math.random() > 0.5;
+            const rd = document.getElementById('res-dir');
+            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
+            rd.style.color = isCall ? "var(--neon)" : "#ff3131";
+            rd.style.textShadow = `0 0 30px ${isCall ? 'var(--neon)' : '#ff3131'}`;
+            
+            document.getElementById('res-acc').innerText = (95 + Math.random()*4.8).toFixed(1) + "%";
+            document.getElementById('res-exp').innerText = currentExp;
+            
+            tg.HapticFeedback.notificationOccurred('success');
+        }
     </script>
 </body>
 </html>
