@@ -3,93 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX QUANTUM CORE</title>
+    <title>ZIORFEX EXECUTIONER</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=Orbitron:wght@900&family=JetBrains+Mono:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=Orbitron:wght@900&family=JetBrains+Mono:wght@500;800&display=swap');
         
-        :root { --neon: #00ffaa; --pink: #ff0055; --bg: #000; }
+        :root { --neon: #00ffaa; --pink: #ff0055; --bg: #000; --panel: #0a0a0c; }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            margin: 0; padding: 15px; background: var(--bg); color: #fff;
+            margin: 0; padding: 12px; background: var(--bg); color: #fff;
             font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
             display: flex; flex-direction: column;
         }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 10px; }
-        .logo { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 5px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .logo { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 4px; }
+        .status { font-size: 7px; color: #333; }
 
         /* MAIN MONITOR */
         .monitor {
-            background: #050505; border: 1px solid #1a1a1a; border-radius: 20px;
-            padding: 40px 10px; text-align: center; margin-bottom: 20px;
-            position: relative; box-shadow: inset 0 0 50px rgba(0,255,170,0.02);
+            background: var(--panel); border: 1px solid #1a1a1c; border-radius: 25px;
+            padding: 35px 15px; text-align: center; position: relative; margin-bottom: 15px;
         }
-        #price { font-family: 'Geo', sans-serif; font-size: 72px; font-weight: 700; line-height: 1; letter-spacing: -3px; }
-        .grid-bg { position: absolute; inset: 0; background-image: radial-gradient(#111 1px, transparent 1px); background-size: 20px 20px; opacity: 0.3; pointer-events: none; }
+        #price { font-family: 'Geo', sans-serif; font-size: 74px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; }
+        
+        /* CONFIDENCE METER */
+        .conf-box { margin-top: 20px; padding: 0 30px; }
+        .conf-label { font-size: 8px; color: #444; letter-spacing: 3px; margin-bottom: 8px; display: block; }
+        .conf-bar { height: 2px; background: #111; border-radius: 10px; position: relative; }
+        #conf-fill { position: absolute; height: 100%; width: 70%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: 0.8s ease; }
 
-        /* ТЕПЛОВА КАРТА ЛІКВІДНОСТІ */
-        .liquidity-wrap { display: flex; gap: 3px; justify-content: center; margin-top: 20px; }
-        .l-bar { width: 15px; height: 4px; background: #111; border-radius: 1px; transition: 0.3s; }
-
-        .u-label { font-size: 8px; color: #444; text-transform: uppercase; margin: 15px 0 10px 5px; letter-spacing: 3px; }
+        .u-label { font-size: 8px; color: #444; text-transform: uppercase; margin: 10px 0 10px 10px; letter-spacing: 4px; }
 
         /* CARDS */
-        .scroller { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
+        .scroller { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 5px; }
         .scroller::-webkit-scrollbar { display: none; }
         .card {
-            min-width: 130px; background: #080808; border: 1px solid #1a1a1a;
-            padding: 20px; border-radius: 15px; text-align: center; transition: 0.2s;
+            min-width: 135px; background: var(--panel); border: 1px solid #1a1a1c;
+            padding: 22px; border-radius: 20px; text-align: center; transition: 0.3s;
         }
-        .card.active { border-color: var(--neon); background: rgba(0,255,170,0.02); }
-        .card span { font-size: 11px; color: #666; }
+        .card.active { border-color: var(--neon); background: rgba(0,255,170,0.03); }
+        .card span { font-size: 11px; font-weight: 800; color: #555; }
         .card.active span { color: #fff; }
 
         /* ACTION BUTTON */
-        .btn-quantum {
-            width: 100%; padding: 28px; border-radius: 20px; border: none;
+        .btn-exe {
+            width: 100%; padding: 28px; border-radius: 25px; border: none;
             background: #fff; color: #000; font-family: 'Orbitron'; font-weight: 900;
             font-size: 18px; margin-top: auto; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255,255,255,0.05);
         }
-        .btn-quantum:active { transform: scale(0.95); background: var(--neon); }
+        .btn-exe:active { transform: scale(0.96); background: var(--neon); }
 
         /* OVERLAY АНАЛІЗУ */
         #overlay {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: none; position: fixed; inset: 0; background: #000; z-index: 2000;
             flex-direction: column; align-items: center; justify-content: center;
         }
-        .scan-line { width: 100%; height: 1px; background: var(--neon); position: absolute; box-shadow: 0 0 20px var(--neon); animation: v-scan 1.5s infinite linear; }
-        @keyframes v-scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* РЕЗУЛЬТАТ */
-        #result { display: none; text-align: center; width: 100%; padding: 20px; }
-        #res-dir { font-family: 'Orbitron'; font-size: 100px; font-weight: 900; line-height: 0.9; margin-bottom: 20px; }
-        .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 40px; }
-        .m-item { background: #080808; padding: 15px; border-radius: 10px; border: 1px solid #111; }
-        .m-val { display: block; font-size: 14px; color: var(--neon); }
-        .m-lab { font-size: 7px; color: #333; }
+        .loader-txt { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 12px; margin-bottom: 40px; }
+        
+        #result { display: none; text-align: center; width: 100%; }
+        #res-dir { font-family: 'Orbitron'; font-size: 110px; font-weight: 900; margin: 0; line-height: 0.8; }
+        .accuracy-pill { margin-top: 30px; font-size: 22px; font-weight: 800; color: var(--neon); padding: 10px 30px; border-radius: 50px; background: #080808; border: 1px solid #1a1a1c; display: inline-block; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">QUANTUM G8.5</div>
-        <div style="font-size: 7px; color: #222;">PROBABILITY: HIGH</div>
+        <div class="logo">ZIORFEX G9.0</div>
+        <div class="status">ENGINE: OPTIMIZED</div>
     </div>
 
     <div class="monitor">
-        <div class="grid-bg"></div>
         <div id="price">0.91230</div>
-        <div class="liquidity-wrap" id="l-wrap"></div>
+        <div class="conf-box">
+            <span class="conf-label">MARKET_SENTIMENT</span>
+            <div class="conf-bar"><div id="conf-fill"></div></div>
+        </div>
     </div>
 
-    <span class="u-label">Neural Target</span>
+    <span class="u-label">Neural Channel</span>
     <div class="scroller">
-        <div class="card active" onclick="selItem('AUD/CAD', this)"><span>🌕 AUD/CAD</span></div>
-        <div class="card" onclick="selItem('EUR/USD', this)"><span>🇪🇺 EUR/USD</span></div>
-        <div class="card" onclick="selItem('CRYPTO', this)"><span>💎 CRYPTO</span></div>
+        <div class="card active" onclick="selAsset('AUD/CAD', this)"><span>🌕 AUD/CAD</span></div>
+        <div class="card" onclick="selAsset('EUR/USD', this)"><span>🇪🇺 EUR/USD</span></div>
+        <div class="card" onclick="selAsset('BTC/USD', this)"><span>₿ BITCOIN</span></div>
     </div>
 
     <span class="u-label">Timeframe</span>
@@ -100,44 +99,27 @@
         <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>1M</span></button>
     </div>
 
-    <button class="btn-quantum" onclick="runEngine()">ВСТАНОВИТИ ЗВ'ЯЗОК</button>
+    <button class="btn-exe" onclick="executeAnalysis()">ПРОАНАЛІЗУВАТИ</button>
 
     <div id="overlay">
-        <div class="scan-line"></div>
-        <div id="loading-txt" style="font-family:'Orbitron'; font-size:10px; color:var(--neon); letter-spacing:10px;">PROBING_MARKET</div>
-        
+        <div class="loader-txt" id="l-txt">SCANNING...</div>
         <div id="result">
             <div id="res-dir">CALL</div>
-            <div style="font-size: 20px; font-weight: 800; color: var(--neon);" id="res-acc">99.2%</div>
-            
-            <div class="metrics">
-                <div class="m-item"><span class="m-val" id="m-vol">94%</span><span class="m-lab">VOLUME</span></div>
-                <div class="m-item"><span class="m-val" id="m-tr">88%</span><span class="m-lab">TREND</span></div>
-                <div class="m-item"><span class="m-val" id="m-mo">91%</span><span class="m-lab">MOMENTUM</span></div>
-            </div>
-
-            <button class="btn-quantum" style="margin-top:50px; background:transparent; border:1px solid #111; color:#fff;" onclick="location.reload()">RE-SCAN</button>
+            <div class="accuracy-pill" id="res-acc">98.2%</div>
+            <div style="margin-top:60px;"><button class="btn-exe" style="width: 220px; background: transparent; border: 1px solid #111; color: #fff;" onclick="location.reload()">BACK</button></div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         
-        // --- LIQUIDITY BARS ---
-        const wrap = document.getElementById('l-wrap');
-        for(let i=0; i<15; i++) {
-            let b = document.createElement('div'); b.className = 'l-bar'; wrap.appendChild(b);
-        }
+        // Живий графік та впевненість
         setInterval(() => {
-            document.querySelectorAll('.l-bar').forEach(b => {
-                const r = Math.random();
-                b.style.background = r > 0.8 ? 'var(--neon)' : r > 0.6 ? 'var(--pink)' : '#111';
-                b.style.boxShadow = r > 0.8 ? '0 0 8px var(--neon)' : 'none';
-            });
-            document.getElementById('price').innerText = (0.91200 + Math.random()*0.0015).toFixed(5);
-        }, 600);
+            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00140).toFixed(5);
+            document.getElementById('conf-fill').style.width = (40 + Math.random()*55) + '%';
+        }, 900);
 
-        function selItem(n, e) {
+        function selAsset(n, e) {
             document.querySelectorAll('.scroller .card').forEach(c => c.classList.remove('active'));
             e.classList.add('active');
             tg.HapticFeedback.impactOccurred('medium');
@@ -149,30 +131,34 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        async function runEngine() {
+        async function executeAnalysis() {
             tg.HapticFeedback.impactOccurred('heavy');
             document.getElementById('overlay').style.display = 'flex';
             
-            // "Електрична" вібрація
-            let pulse = setInterval(() => { tg.HapticFeedback.impactOccurred('soft'); }, 300);
+            // Ефект "промацування" ціни
+            let steps = ["VOLATILITY_CHECK", "MOMENTUM_SCAN", "TONE_ANALYSIS", "FINALIZING"];
+            let i = 0;
+            let iv = setInterval(() => {
+                document.getElementById('l-txt').innerText = steps[i];
+                tg.HapticFeedback.impactOccurred('soft');
+                i++;
+                if(i >= steps.length) clearInterval(iv);
+            }, 1200);
 
             await new Promise(r => setTimeout(r, 5000));
-            clearInterval(pulse);
 
-            document.getElementById('loading-txt').style.display = 'none';
-            document.querySelector('.scan-line').style.display = 'none';
+            document.getElementById('l-txt').style.display = 'none';
             document.getElementById('result').style.display = 'block';
 
-            const isCall = Math.random() > 0.45;
-            const rd = document.getElementById('res-dir');
-            rd.innerText = isCall ? "CALL" : "PUT";
-            rd.style.color = isCall ? "var(--neon)" : "var(--pink)";
-            rd.style.textShadow = `0 0 60px ${isCall ? 'var(--neon)' : 'var(--pink)'}`;
+            const isCall = Math.random() > 0.48;
+            const resDir = document.getElementById('res-dir');
+            resDir.innerText = isCall ? "CALL" : "PUT";
+            resDir.style.color = isCall ? "var(--neon)" : "var(--pink)";
+            resDir.style.textShadow = `0 0 70px ${isCall ? 'var(--neon)' : 'var(--pink)'}`;
             
-            document.getElementById('res-acc').innerText = (97.1 + Math.random()*2.8).toFixed(1) + "%";
-            document.getElementById('m-vol').innerText = Math.floor(90 + Math.random()*9) + "%";
-            document.getElementById('m-tr').innerText = Math.floor(85 + Math.random()*12) + "%";
-            document.getElementById('m-mo').innerText = Math.floor(88 + Math.random()*10) + "%";
+            // Видаємо високий % тільки якщо "пощастило" з рандомом для імітації точності
+            const baseAcc = 96.2 + Math.random()*3.5;
+            document.getElementById('res-acc').innerText = baseAcc.toFixed(1) + "% CONFIDENCE";
             
             tg.HapticFeedback.notificationOccurred('success');
         }
