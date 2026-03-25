@@ -3,179 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX ZENITH G7</title>
+    <title>ZIORFEX QUANTUM CORE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@400;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=Orbitron:wght@900&family=JetBrains+Mono:wght@700&display=swap');
         
-        :root {
-            --neon: #00ffaa; --pink: #ff0055; --bg: #000000;
-            --glass: rgba(255, 255, 255, 0.02);
-            --border: rgba(255, 255, 255, 0.08);
-        }
+        :root { --neon: #00ffaa; --pink: #ff0055; --bg: #000; }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
             margin: 0; padding: 15px; background: var(--bg); color: #fff;
-            font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; height: 100vh;
+            font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
             display: flex; flex-direction: column;
         }
 
-        /* Фоновий квантовий туман */
-        .fog { position: fixed; inset: 0; background: radial-gradient(circle at 50% -20%, #0a1a15 0%, #000 70%); z-index: -1; }
-
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .logo { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 8px; text-shadow: 0 0 20px var(--neon); }
-        .ver { font-size: 7px; color: #333; letter-spacing: 2px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 10px; }
+        .logo { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 5px; }
 
-        /* MAIN TERMINAL */
-        .terminal {
-            background: var(--glass); border: 1px solid var(--border); border-radius: 40px;
-            padding: 40px 20px; position: relative; backdrop-filter: blur(40px);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8); margin-bottom: 20px;
-            overflow: hidden;
+        /* MAIN MONITOR */
+        .monitor {
+            background: #050505; border: 1px solid #1a1a1a; border-radius: 20px;
+            padding: 40px 10px; text-align: center; margin-bottom: 20px;
+            position: relative; box-shadow: inset 0 0 50px rgba(0,255,170,0.02);
         }
-        #price { font-family: 'Geo', sans-serif; font-size: 78px; font-weight: 700; line-height: 1; letter-spacing: -4px; position: relative; z-index: 2; }
-        
-        /* КЛАСТЕРИ ЛІКВІДНОСТІ (HEATMAP) */
-        .clusters { display: flex; justify-content: center; gap: 4px; margin-top: 25px; }
-        .block { width: 12px; height: 4px; border-radius: 2px; background: #111; transition: 0.4s; }
+        #price { font-family: 'Geo', sans-serif; font-size: 72px; font-weight: 700; line-height: 1; letter-spacing: -3px; }
+        .grid-bg { position: absolute; inset: 0; background-image: radial-gradient(#111 1px, transparent 1px); background-size: 20px 20px; opacity: 0.3; pointer-events: none; }
 
-        .u-label { font-size: 8px; color: var(--neon); text-transform: uppercase; margin: 15px 0 10px 15px; letter-spacing: 5px; font-weight: 900; opacity: 0.6; }
+        /* ТЕПЛОВА КАРТА ЛІКВІДНОСТІ */
+        .liquidity-wrap { display: flex; gap: 3px; justify-content: center; margin-top: 20px; }
+        .l-bar { width: 15px; height: 4px; background: #111; border-radius: 1px; transition: 0.3s; }
 
-        /* PREMIUM ASSET CARDS */
-        .scroller { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 5px; }
+        .u-label { font-size: 8px; color: #444; text-transform: uppercase; margin: 15px 0 10px 5px; letter-spacing: 3px; }
+
+        /* CARDS */
+        .scroller { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
         .scroller::-webkit-scrollbar { display: none; }
-        .card-pro {
-            min-width: 145px; background: var(--glass); border: 1px solid var(--border);
-            padding: 24px; border-radius: 28px; text-align: center; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        .card {
+            min-width: 130px; background: #080808; border: 1px solid #1a1a1a;
+            padding: 20px; border-radius: 15px; text-align: center; transition: 0.2s;
         }
-        .card-pro.active { border-color: var(--neon); background: rgba(0, 255, 170, 0.05); transform: scale(1.05); }
-        .card-pro span { display: block; font-size: 12px; font-weight: 800; color: #555; letter-spacing: 1px; }
-        .card-pro.active span { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .card.active { border-color: var(--neon); background: rgba(0,255,170,0.02); }
+        .card span { font-size: 11px; color: #666; }
+        .card.active span { color: #fff; }
 
-        /* ACTION BUTTON (ZENITH) */
-        .btn-zenith {
-            width: 100%; padding: 30px; border-radius: 35px; border: none;
+        /* ACTION BUTTON */
+        .btn-quantum {
+            width: 100%; padding: 28px; border-radius: 20px; border: none;
             background: #fff; color: #000; font-family: 'Orbitron'; font-weight: 900;
-            font-size: 18px; margin-top: auto; cursor: pointer; transition: 0.4s;
-            box-shadow: 0 20px 50px rgba(255,255,255,0.05);
+            font-size: 18px; margin-top: auto; cursor: pointer;
         }
-        .btn-zenith:active { transform: scale(0.94); background: var(--neon); box-shadow: 0 0 40px var(--neon); }
+        .btn-quantum:active { transform: scale(0.95); background: var(--neon); }
 
-        /* ANALYSIS OVERLAY */
+        /* OVERLAY АНАЛІЗУ */
         #overlay {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 5000;
+            display: none; position: fixed; inset: 0; background: #000; z-index: 1000;
             flex-direction: column; align-items: center; justify-content: center;
         }
-        .ai-core { position: relative; width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; }
-        .ring { position: absolute; inset: 0; border: 1px solid #111; border-top: 1px solid var(--neon); border-radius: 50%; animation: spin 2s infinite linear; }
-        .ring:nth-child(2) { inset: 20px; border-top-color: var(--pink); animation-duration: 3s; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .scan-line { width: 100%; height: 1px; background: var(--neon); position: absolute; box-shadow: 0 0 20px var(--neon); animation: v-scan 1.5s infinite linear; }
+        @keyframes v-scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        #result { display: none; text-align: center; }
-        #res-dir { font-family: 'Orbitron'; font-size: 115px; font-weight: 900; line-height: 0.8; letter-spacing: -5px; }
-        .acc-badge { margin-top: 40px; font-size: 26px; font-weight: 800; color: var(--neon); letter-spacing: 2px; }
+        /* РЕЗУЛЬТАТ */
+        #result { display: none; text-align: center; width: 100%; padding: 20px; }
+        #res-dir { font-family: 'Orbitron'; font-size: 100px; font-weight: 900; line-height: 0.9; margin-bottom: 20px; }
+        .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 40px; }
+        .m-item { background: #080808; padding: 15px; border-radius: 10px; border: 1px solid #111; }
+        .m-val { display: block; font-size: 14px; color: var(--neon); }
+        .m-lab { font-size: 7px; color: #333; }
     </style>
 </head>
 <body>
 
-    <div class="fog"></div>
-
     <div class="header">
-        <div class="logo">ZIORFEX ZENITH</div>
-        <div class="ver">G7 // ARCHITECT</div>
+        <div class="logo">QUANTUM G8.5</div>
+        <div style="font-size: 7px; color: #222;">PROBABILITY: HIGH</div>
     </div>
 
-    <div class="terminal">
+    <div class="monitor">
+        <div class="grid-bg"></div>
         <div id="price">0.91230</div>
-        <div class="clusters" id="clusters"></div>
-        <div style="margin-top:20px; font-size:7px; color:#222; letter-spacing:6px;">LIQUIDITY_MAP_ACTIVE</div>
+        <div class="liquidity-wrap" id="l-wrap"></div>
     </div>
 
-    <span class="u-label">Neural Asset Focus</span>
+    <span class="u-label">Neural Target</span>
     <div class="scroller">
-        <div class="card-pro active" onclick="selItem('AUD/CAD', this)"><span>🌕 AUD/CAD</span></div>
-        <div class="card-pro" onclick="selItem('EUR/USD', this)"><span>🇪🇺 EUR/USD</span></div>
-        <div class="card-pro" onclick="selItem('XAU/USD', this)"><span>🏆 GOLD (OTC)</span></div>
+        <div class="card active" onclick="selItem('AUD/CAD', this)"><span>🌕 AUD/CAD</span></div>
+        <div class="card" onclick="selItem('EUR/USD', this)"><span>🇪🇺 EUR/USD</span></div>
+        <div class="card" onclick="selItem('CRYPTO', this)"><span>💎 CRYPTO</span></div>
     </div>
 
-    <span class="u-label">Expiration</span>
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-        <button class="card-pro active" style="min-width:auto; padding: 18px 0;" onclick="selTF(this)"><span>5S</span></button>
-        <button class="card-pro" style="min-width:auto; padding: 18px 0;" onclick="selTF(this)"><span>15S</span></button>
-        <button class="card-pro" style="min-width:auto; padding: 18px 0;" onclick="selTF(this)"><span>30S</span></button>
-        <button class="card-pro" style="min-width:auto; padding: 18px 0;" onclick="selTF(this)"><span>1M</span></button>
+    <span class="u-label">Timeframe</span>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <button class="card active" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>5S</span></button>
+        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>15S</span></button>
+        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>30S</span></button>
+        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>1M</span></button>
     </div>
 
-    <button class="btn-zenith" onclick="executeZenith()">АНАЛІЗУВАТИ</button>
+    <button class="btn-quantum" onclick="runEngine()">ВСТАНОВИТИ ЗВ'ЯЗОК</button>
 
     <div id="overlay">
-        <div class="ai-core">
-            <div class="ring"></div><div class="ring"></div>
-            <div style="font-family:'Orbitron'; font-size:10px; color:var(--neon); letter-spacing:4px;">SYNCING</div>
-        </div>
+        <div class="scan-line"></div>
+        <div id="loading-txt" style="font-family:'Orbitron'; font-size:10px; color:var(--neon); letter-spacing:10px;">PROBING_MARKET</div>
         
         <div id="result">
             <div id="res-dir">CALL</div>
-            <div class="acc-badge" id="res-acc">99.4%</div>
-            <div style="margin-top:60px;"><button class="btn-zenith" style="width:240px; background:transparent; border:1px solid #111; color:#fff;" onclick="location.reload()">TERMINATE</button></div>
+            <div style="font-size: 20px; font-weight: 800; color: var(--neon);" id="res-acc">99.2%</div>
+            
+            <div class="metrics">
+                <div class="m-item"><span class="m-val" id="m-vol">94%</span><span class="m-lab">VOLUME</span></div>
+                <div class="m-item"><span class="m-val" id="m-tr">88%</span><span class="m-lab">TREND</span></div>
+                <div class="m-item"><span class="m-val" id="m-mo">91%</span><span class="m-lab">MOMENTUM</span></div>
+            </div>
+
+            <button class="btn-quantum" style="margin-top:50px; background:transparent; border:1px solid #111; color:#fff;" onclick="location.reload()">RE-SCAN</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         
-        // --- LIQUIDITY GRID ---
-        const cl = document.getElementById('clusters');
-        for(let i=0; i<12; i++) {
-            let b = document.createElement('div'); b.className = 'block'; cl.appendChild(b);
+        // --- LIQUIDITY BARS ---
+        const wrap = document.getElementById('l-wrap');
+        for(let i=0; i<15; i++) {
+            let b = document.createElement('div'); b.className = 'l-bar'; wrap.appendChild(b);
         }
         setInterval(() => {
-            document.querySelectorAll('.block').forEach(b => {
+            document.querySelectorAll('.l-bar').forEach(b => {
                 const r = Math.random();
-                b.style.background = r > 0.85 ? 'var(--neon)' : r > 0.7 ? 'var(--pink)' : '#0a0a0a';
-                b.style.boxShadow = r > 0.85 ? '0 0 10px var(--neon)' : 'none';
+                b.style.background = r > 0.8 ? 'var(--neon)' : r > 0.6 ? 'var(--pink)' : '#111';
+                b.style.boxShadow = r > 0.8 ? '0 0 8px var(--neon)' : 'none';
             });
-            const p = (0.91200 + Math.random()*0.00120).toFixed(5);
-            document.getElementById('price').innerText = p;
-        }, 700);
+            document.getElementById('price').innerText = (0.91200 + Math.random()*0.0015).toFixed(5);
+        }, 600);
 
         function selItem(n, e) {
-            document.querySelectorAll('.scroller .card-pro').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.scroller .card').forEach(c => c.classList.remove('active'));
             e.classList.add('active');
             tg.HapticFeedback.impactOccurred('medium');
         }
 
         function selTF(e) {
-            document.querySelectorAll('button.card-pro').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('button.card').forEach(c => c.classList.remove('active'));
             e.classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        async function executeZenith() {
+        async function runEngine() {
             tg.HapticFeedback.impactOccurred('heavy');
             document.getElementById('overlay').style.display = 'flex';
             
-            // "Пульсація" ринку через вібрацію
-            let pulse = setInterval(() => { tg.HapticFeedback.impactOccurred('soft'); }, 500);
+            // "Електрична" вібрація
+            let pulse = setInterval(() => { tg.HapticFeedback.impactOccurred('soft'); }, 300);
 
             await new Promise(r => setTimeout(r, 5000));
             clearInterval(pulse);
 
-            document.querySelector('.ai-core').style.display = 'none';
+            document.getElementById('loading-txt').style.display = 'none';
+            document.querySelector('.scan-line').style.display = 'none';
             document.getElementById('result').style.display = 'block';
 
-            const win = 97.4 + Math.random() * 2.5;
-            const isCall = Math.random() > 0.48;
-            
+            const isCall = Math.random() > 0.45;
             const rd = document.getElementById('res-dir');
             rd.innerText = isCall ? "CALL" : "PUT";
             rd.style.color = isCall ? "var(--neon)" : "var(--pink)";
-            rd.style.textShadow = `0 0 80px ${isCall ? 'var(--neon)' : 'var(--pink)'}`;
+            rd.style.textShadow = `0 0 60px ${isCall ? 'var(--neon)' : 'var(--pink)'}`;
             
-            document.getElementById('res-acc').innerText = win.toFixed(1) + "% CONFIRMED";
+            document.getElementById('res-acc').innerText = (97.1 + Math.random()*2.8).toFixed(1) + "%";
+            document.getElementById('m-vol').innerText = Math.floor(90 + Math.random()*9) + "%";
+            document.getElementById('m-tr').innerText = Math.floor(85 + Math.random()*12) + "%";
+            document.getElementById('m-mo').innerText = Math.floor(88 + Math.random()*10) + "%";
+            
             tg.HapticFeedback.notificationOccurred('success');
         }
     </script>
