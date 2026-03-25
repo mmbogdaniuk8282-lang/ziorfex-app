@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZIORFEX OVERLORD</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        :root { --neon: #00ff88; --bg: #010203; --card: rgba(18, 22, 30, 0.85); --text: #ffffff; --gold: #f0b90b; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        #bg-particles { position: fixed; top: 0; left: 0; z-index: -1; }
+        .app { padding: 15px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; z-index: 10; }
+        .logo { font-weight: 900; font-size: 22px; letter-spacing: -1px; text-shadow: 0 0 15px var(--neon); }
+        .logo span { color: var(--neon); }
+        select#lang { background: #13171f; color: #fff; border: 1px solid var(--neon); border-radius: 10px; padding: 6px 10px; outline: none; font-weight: bold; }
+        #chart-wrap { position: relative; width: 100%; height: 240px; background: #000; border-radius: 24px; border: 1px solid rgba(0, 255, 136, 0.4); overflow: hidden; margin-bottom: 15px; box-shadow: 0 0 30px rgba(0,255,136,0.15); }
+        #scanner-line { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,255,136,0.4), transparent); z-index: 5; display: none; }
+        .card { background: var(--card); border-radius: 28px; padding: 22px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(15px); position: relative; }
+        label { font-size: 10px; color: #848e9c; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+        select.input-field { width: 100%; background: #080a0d; border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 14px; color: #fff; margin-bottom: 18px; outline: none; font-size: 14px; }
+        .btn-overlord { width: 100%; padding: 20px; border-radius: 18px; border: none; background: linear-gradient(135deg, var(--neon) 0%, #008f4c 100%); color: #000; font-weight: 900; font-size: 16px; text-transform: uppercase; cursor: pointer; box-shadow: 0 12px 25px rgba(0,255,136,0.4); transition: 0.2s; }
+        #log-console { display: none; font-family: 'Courier New', monospace; font-size: 10px; color: var(--neon); background: #000; padding: 12px; border-radius: 14px; margin-top: 12px; height: 60px; overflow: hidden; border: 1px solid rgba(0,255,136,0.2); }
+        #result-display { display: none; text-align: center; margin-top: 15px; }
+        .dir-text { font-size: 56px; font-weight: 900; margin: 5px 0; letter-spacing: -3px; }
+        .up { color: var(--neon); text-shadow: 0 0 40px var(--neon); }
+        .down { color: #ff3b5c; text-shadow: 0 0 40px #ff3b5c; }
+        .stat-row { display: flex; justify-content: space-around; margin-top: 15px; }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; min-width: 80px; }
+        .stat-val { display: block; font-weight: 900; font-size: 18px; color: var(--gold); }
+        .stat-lbl { font-size: 9px; color: #848e9c; text-transform: uppercase; }
+        .p-bar { height: 8px; background: rgba(255,255,255,0.05); border-radius: 20px; margin-top: 25px; overflow: hidden; }
+        .p-fill { height: 100%; background: var(--neon); width: 0%; box-shadow: 0 0 15px var(--neon); }
+        @keyframes scan { from { left: -100%; } to { left: 200%; } }
+    </style>
+</head>
+<body>
+    <canvas id="bg-particles"></canvas>
+    <div class="app">
+        <div class="header">
+            <div class="logo">NEURAL <span>OVERLORD</span></div>
+            <select id="lang" onchange="applyLang()">
+                <option value="ua">🇺🇦 UA</option>
+                <option value="ru">🇷🇺 RU</option>
+                <option value="en">🇺🇸 EN</option>
+            </select>
+        </div>
+        <div id="chart-wrap">
+            <div id="scanner-line"></div>
+            <div id="chart-el" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="card">
+            <label id="l-ast">АКТИВ АНАЛІЗУ</label>
+            <select id="asset-sel" class="input-field">
+                <option>EUR/USD (NEURAL)</option>
+                <option>BTC/USDT (CORE)</option>
+                <option>GOLD (HFT-SPOT)</option>
+            </select>
+            <button class="btn-overlord" id="go-btn" onclick="execute()">RUN NEURAL SCAN</button>
+            <div id="log-console"></div>
+        </div>
+        <div id="result-display" class="card">
+            <div id="dir-val" class="dir-text">UP ▲</div>
+            <div class="stat-row">
+                <div class="stat-item"><span class="stat-val" id="perc-val">98.92%</span><span class="stat-lbl" id="l-acc">Точність</span></div>
+                <div class="stat-item"><span class="stat-val" style="color:var(--neon)">STRONG</span><span class="stat-lbl">POWER</span></div>
+            </div>
+            <div class="p-bar"><div class="p-fill" id="progress-fill"></div></div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('bg-particles');
+        const ctx = canvas.getContext('2d');
+        let dots = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            for(let i=0; i<40; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2, v:Math.random()*0.6});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "rgba(0, 255, 136, 0.25)";
+            dots.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI*2); ctx.fill(); d.y -= d.v; if(d.y < 0) d.y = canvas.height; });
+            requestAnimationFrame(draw);
+        }
+        init(); draw();
+        const chart = LightweightCharts.createChart(document.getElementById('chart-el'), {
+            layout: { backgroundColor: '#000', textColor: '#848e9c' },
+            grid: { vertLines: { visible: false }, horzLines: { color: '#111' } },
+            timeScale: { borderColor: '#222', timeVisible: true }
+        });
+        const series = chart.addCandlestickSeries({ upColor: '#00ff88', downColor: '#ff3b5c' });
+        let p = 1.0850; let d = []; let now = Math.floor(Date.now()/1000)-500;
+        for(let i=0; i<80; i++) {
+            let o = p; let c = o + (Math.random()-0.5)*0.0012;
+            d.push({time: now+i, open:o, high: Math.max(o,c)+0.0004, low: Math.min(o,c)-0.0004, close:c}); p = c;
+        }
+        series.setData(d);
+        setInterval(() => {
+            let l = d[d.length-1]; let c = l.close + (Math.random()-0.5)*0.0002;
+            series.update({...l, close:c, high: Math.max(l.high, c), low: Math.min(l.low, c)});
+        }, 1000);
+        const langDb = {
+            ua: { ast: "Актив аналізу", btn: "ЗАПУСТИТИ СКАНЕР", acc: "Точність", up: "ВГОРУ ▲", down: "ВНИЗ ▼" },
+            ru: { ast: "Актив анализа", btn: "ЗАПУСТИТЬ СКАНЕР", acc: "Точность", up: "ВВЕРХ ▲", down: "ВНИЗ ▼" },
+            en: { ast: "Analysis Asset", btn: "RUN NEURAL SCAN", acc: "Accuracy", up: "CALL ▲", down: "PUT ▼" }
+        };
+        function applyLang() {
+            const l = langDb[document.getElementById('lang').value];
+            document.getElementById('l-ast').innerText = l.ast.toUpperCase();
+            document.getElementById('go-btn').innerText = l.btn.toUpperCase();
+            document.getElementById('l-acc').innerText = l.acc.toUpperCase();
+        }
+        function execute() {
+            const btn = document.getElementById('go-btn'), log = document.getElementById('log-console'), res = document.getElementById('result-display'), scan = document.getElementById('scanner-line'), l = langDb[document.getElementById('lang').value];
+            btn.disabled = true; log.style.display = 'block'; res.style.display = 'none'; scan.style.display = 'block'; scan.style.animation = 'scan 1.5s linear infinite'; log.innerHTML = "";
+            let c = 0;
+            const timer = setInterval(() => {
+                const logs = ["> SYNC_NEURAL_LINK...", "> ANALYZING_CANDLE_DENSITY", "> VOLATILITY_CORE_DETECTED", "> PREDICTING_NEXT_MOVE"];
+                log.innerHTML += logs[c%4] + "<br>";
+                if(++c > 12) {
+                    clearInterval(timer); log.style.display = 'none'; scan.style.display = 'none'; res.style.display = 'block';
+                    const isUp = Math.random() > 0.5; const dv = document.getElementById('dir-val');
+                    dv.innerText = isUp ? l.up : l.down; dv.className = 'dir-text ' + (isUp ? 'up' : 'down');
+                    document.getElementById('perc-val').innerText = (98.5 + Math.random()*1.4).toFixed(2) + "%";
+                    let w = 0;
+                    const p_timer = setInterval(() => {
+                        w += 1; document.getElementById('progress-fill').style.width = w + '%';
+                        if(w >= 100) { clearInterval(p_timer); res.style.display = 'none'; btn.disabled = false; }
+                    }, 60);
+                }
+            }, 180);
+        }
+    </script>
+</body>
+</html>
