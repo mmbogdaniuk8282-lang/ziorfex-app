@@ -3,187 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX POCKET CORE</title>
+    <title>BOGDANIUK SIGNAL PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;500;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap');
 
         :root {
-            --neon: #00ff88; --bg: #010101; --panel: rgba(13, 13, 13, 0.95);
-            --border: rgba(0, 255, 136, 0.25); --red: #ff3e3e; --blue: #0088ff;
+            --neon: #00ff88; --bg: #050505; --panel: rgba(15, 15, 15, 0.98);
+            --border: rgba(0, 255, 136, 0.15); --red: #ff3e3e; --text: #f0f0f0;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
-            font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; 
+            font-family: 'Roboto Mono', monospace; background: var(--bg); color: var(--text); 
             margin: 0; padding: 15px; height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
-            background-image: radial-gradient(circle at 50% 0%, #081a12 0%, #010101 100%);
+            background-image: radial-gradient(circle at 50% 10%, #0c2b1d 0%, #050505 100%);
         }
 
         /* API STATUS BAR */
         .api-bar {
-            background: rgba(0,0,0,0.6); border: 1px solid var(--border);
-            padding: 12px; border-radius: 16px; margin-bottom: 15px;
+            background: rgba(0,0,0,0.7); border: 1px solid var(--border);
+            padding: 10px 15px; border-radius: 12px; margin-bottom: 15px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.05);
+            font-size: 0.7rem; color: #666; font-weight: 700;
         }
-        .status-dot { width: 8px; height: 8px; background: #555; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .status-online { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        .status-dot { width: 8px; height: 8px; background: var(--neon); border-radius: 50%; box-shadow: 0 0 10px var(--neon); margin-right: 8px; }
 
         /* MAIN PRICE DISPLAY */
         .price-card {
-            text-align: center; padding: 25px; border-radius: 24px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
-            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;
+            text-align: center; padding: 20px; border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+            border: 1px solid rgba(255,255,255,0.03); margin-bottom: 15px;
         }
         #live-asset { font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; color: #888; margin-bottom: 10px; }
-        #live-price { font-family: 'Orbitron'; font-size: 2.2rem; font-weight: 900; transition: 0.2s; }
+        #live-price { font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 900; color: var(--red); transition: color 0.1s; }
 
         .card { 
-            background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px;
+            background: var(--panel); border-radius: 16px; padding: 15px; margin-bottom: 10px;
             border: 1px solid rgba(255,255,255,0.03);
         }
 
-        .label { font-size: 0.6rem; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; opacity: 0.8; }
+        .label { font-size: 0.6rem; color: var(--neon); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+        .val { font-size: 0.85rem; color: #fff; font-weight: 700; }
+
+        select {
+            width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; padding: 12px; border-radius: 8px; font-family: 'Roboto Mono'; font-size: 0.8rem;
+            appearance: none; cursor: pointer;
+        }
 
         .main-btn { 
             width: 100%; background: var(--neon); color: #000; border: none; 
-            padding: 22px; border-radius: 20px; font-family: 'Orbitron', sans-serif;
-            font-weight: 900; text-transform: uppercase; font-size: 1.1rem;
+            padding: 18px; border-radius: 16px; font-family: 'Orbitron', sans-serif;
+            font-weight: 900; text-transform: uppercase; font-size: 1rem;
             margin-top: auto; cursor: pointer; transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
         }
 
         /* SIGNAL UI */
         #result-screen { display: none; text-align: center; flex-direction: column; height: 100%; }
         .signal-indicator {
-            width: 100%; height: 180px; border-radius: 20px;
+            width: 100%; height: 160px; border-radius: 16px;
             margin: 20px 0; display: flex; flex-direction: column; justify-content: center;
-            border: 1px solid var(--border); position: relative; overflow: hidden;
-            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border); background: rgba(0,0,0,0.3); position: relative;
         }
-        .signal-bg { position: absolute; inset: 0; opacity: 0.1; background-size: cover; filter: blur(5px); }
-        
-        #r-dir { font-family: 'Orbitron'; font-size: 3rem; font-weight: 900; z-index: 2; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #r-icon { font-size: 4rem; z-index: 2; margin-bottom: -10px; }
-
-        .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .metric-box { background: rgba(255,255,255,0.02); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .m-val { display: block; font-size: 1.1rem; font-weight: 800; color: var(--neon); }
-        .m-lbl { font-size: 0.55rem; color: #666; text-transform: uppercase; }
+        #r-dir { font-family: 'Orbitron'; font-size: 3rem; font-weight: 900; z-index: 2; }
+        #r-icon { font-size: 3.5rem; z-index: 2; }
 
         /* LOAD ANIMATION */
         #loading { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-        .circle-loader { width: 60px; height: 60px; border: 3px solid rgba(0, 255, 136, 0.1); border-top-color: var(--neon); border-radius: 50%; animation: spin 1s infinite linear; }
+        .circle-loader { width: 50px; height: 50px; border: 3px solid rgba(0, 255, 136, 0.1); border-top-color: var(--neon); border-radius: 50%; animation: spin 1s infinite linear; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="api-bar">
-        <div style="font-size: 0.65rem; font-weight: 700; color: var(--neon);">
-            <span class="status-dot status-online" id="dot"></span> POCKET_GATEWAY_v11
-        </div>
-        <div style="font-size: 0.6rem; color: #555;" id="ping">PING: 24ms</div>
+        <div style="display:flex; align-items:center;"><span class="status-dot"></span> POCKET_GATEWAY_v11</div>
+        <div style="color:#444;">PING: 31ms</div>
     </div>
 
     <div class="price-card">
         <div id="live-asset">EUR/USD (OTC)</div>
-        <div id="live-price">1.08422</div>
+        <div id="live-price">1.08415</div>
     </div>
 
     <div id="setup-screen" style="display: flex; flex-direction: column; height: 75%;">
         <div class="card">
             <span class="label">API CONNECTION</span>
-            <div style="font-size:0.8rem; color:#fff;">POCKETOPTION_STABLE_API v1.2</div>
+            <div class="val">POCKETOPTION_STABLE_API v1.2</div>
         </div>
         <div class="card">
             <span class="label">NEURAL ENGINE</span>
-            <div style="font-size:0.8rem; color:#fff;">MOMENTUM_ANALYTIC_PRO</div>
+            <div class="val">MOMENTUM_ANALYTIC_PRO</div>
         </div>
-        <button class="main-btn" onclick="startPocketScan()">GET POCKET SIGNAL</button>
+        
+        <div class="card">
+            <span class="label">TIME FRAME ANALYZE</span>
+            <select id="tf-select">
+                <option value="5">5 SEC (FLASH SCALP)</option>
+                <option value="30">30 SEC (ULTRA SCALP)</option>
+                <option value="60" selected>1 MIN (STANDARD)</option>
+                <option value="300">5 MIN (TITAN STABLE)</option>
+            </select>
+        </div>
+        
+        <button class="main-btn" onclick="startPocketAnalysis()">GET POCKET SIGNAL</button>
     </div>
 
     <div id="loading">
         <div class="circle-loader"></div>
-        <div style="margin-top:20px; font-size:0.7rem; color:var(--neon); letter-spacing:1px;" id="load-text">CONNECTING TO SOCKET...</div>
+        <div style="margin-top:20px; font-size:0.7rem; color:var(--neon); letter-spacing:1px;" id="load-text">CONNECTING TO GATEWAY...</div>
     </div>
 
     <div id="result-screen">
         <div class="signal-indicator" id="s-ind">
-            <div class="signal-bg" id="s-bg"></div>
             <span id="r-icon">↑</span>
             <span id="r-dir">CALL</span>
         </div>
-        
-        <div class="metrics">
-            <div class="metric-box">
-                <span class="m-val" id="r-prob">98.4%</span>
-                <span class="m-lbl">Probability</span>
-            </div>
-            <div class="metric-box">
-                <span class="m-val" id="r-time">1 MIN</span>
-                <span class="m-lbl">EXPIRATION</span>
-            </div>
+        <div class="card">
+            <span class="label">ANALYSIS COMPLETE</span>
+            <div class="val" id="r-desc">5s FLASH TREND DETECTED</div>
         </div>
-
-        <button class="main-btn" style="background:transparent; border:1px solid var(--border); color:#fff; margin-top:25px;" onclick="location.reload()">REFRESH SESSION</button>
+        <button class="main-btn" style="background:transparent; border:1px solid var(--border); color:#fff; margin-top:15px;" onclick="location.reload()">REFRESH ANALYTICS</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ІМІТАЦІЯ ТІКІВ POCKET OPTION (Реальна логіка)
-        let price = 1.08422;
+        // ІМІТАЦІЯ ТІКІВ (Для візуалу)
+        let price = 1.08415;
         let history = [];
-
         function updatePrice() {
-            const change = (Math.random() * 0.00010 - 0.00005);
-            price = (parseFloat(price) + change).toFixed(5);
-            const el = document.getElementById('live-price');
-            el.innerText = price;
-            el.style.color = change > 0 ? '#00ff88' : '#ff3e3e';
-            
+            price = (parseFloat(price) + (Math.random() * 0.00008 - 0.00004)).toFixed(5);
+            document.getElementById('live-price').innerText = price;
             history.push(price);
-            if(history.length > 15) history.shift();
-            
-            // Динамічний пінг
-            document.getElementById('ping').innerText = `PING: ${Math.floor(Math.random() * 20 + 15)}ms`;
+            if(history.length > 20) history.shift();
         }
-        setInterval(updatePrice, 1000);
+        setInterval(updatePrice, 800);
 
-        async function startPocketScan() {
+        async function startPocketAnalysis() {
             tg.HapticFeedback.impactOccurred('heavy');
+            const tf = document.getElementById('tf-select').value;
+            const tfText = document.getElementById('tf-select').options[document.getElementById('tf-select').selectedIndex].text;
+            
             document.getElementById('setup-screen').style.display = 'none';
             document.getElementById('loading').style.display = 'flex';
 
-            const steps = ["FETCHING SOCKET DATA...", "ANALYZING CANDLE DELTA...", "Neural_v11 CALCULATION...", "POCKET_SIGNAL GENERATED!"];
-            for(let s of steps) {
-                document.getElementById('load-text').innerText = s;
-                await new Promise(r => setTimeout(r, 800));
-            }
+            // Реальна затримка таймфрейму (наприклад, 5 секунд)
+            document.getElementById('load-text').innerText = `ANALYZING ${tfText}...`;
+            
+            // Записуємо ціну "ДО"
+            const startPrice = price;
+            
+            // ЧЕКАЄМО ОБРАНИЙ ЧАС (Технічно правильно!)
+            await new Promise(r => setTimeout(r, tf * 1000));
+            
+            // Записуємо ціну "ПІСЛЯ"
+            const endPrice = price;
 
-            showPocketResult();
+            showPocketSignal(startPrice, endPrice, tfText);
         }
 
-        function showPocketResult() {
+        function showPocketSignal(p1, p2, tfName) {
             tg.HapticFeedback.notificationOccurred('success');
             document.getElementById('loading').style.display = 'none';
             document.getElementById('result-screen').style.display = 'flex';
 
-            // РЕАЛЬНА ЛОГІКА: порівнюємо ціну зараз і 10 секунд тому
-            const startPrice = history[0];
-            const endPrice = history[history.length - 1];
-            const isCall = endPrice >= startPrice;
-
-            const prob = (92 + Math.random() * 6.8).toFixed(1);
-            document.getElementById('r-prob').innerText = prob + '%';
-
+            // РЕАЛЬНА ЛОГІКА НА ОСНОВІ РІЗНИЦІ ЦІН ЗА ЧАС
+            const isCall = p2 >= p1;
+            
             const dir = document.getElementById('r-dir');
             const icon = document.getElementById('r-icon');
             const ind = document.getElementById('s-ind');
+
+            document.getElementById('r-desc').innerText = `${tfName} TREND DETECTED`;
 
             if(isCall) {
                 dir.innerText = "UP / CALL"; icon.innerText = "↑";
@@ -196,150 +192,6 @@
                 dir.style.color = '#ff3e3e'; icon.style.color = '#ff3e3e';
                 ind.style.borderColor = '#ff3e3e';
             }
-        }
-    </script>
-</body>
-</html>
-
-        <div class="card">
-            <div class="label">Market Instrument</div>
-            <select id="pairs" onchange="updateVol()"></select>
-            <div class="volatility-box">
-                <span style="font-size: 0.6rem; color: #555;">VOLATILITY</span>
-                <div class="vol-bar"><div class="vol-fill" id="vol-fill"></div></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="label">Timeframe Analyze</div>
-            <select id="time">
-                <option value="1">1 MIN (ULTRA SCALP)</option>
-                <option value="3">3 MIN (NEURAL GRID)</option>
-                <option value="5">5 MIN (TITAN STABLE)</option>
-            </select>
-        </div>
-
-        <button class="glow-btn" onclick="startNeural()">ANALYZE MARKET</button>
-    </div>
-
-    <div id="analysis-screen">
-        <div class="console" id="logs"></div>
-    </div>
-
-    <div id="result-screen">
-        <div style="font-family: 'Orbitron'; font-size: 1.5rem; color: #fff;" id="res-pair">EUR/USD</div>
-        <div class="result-circle" id="circle">
-            <div class="inner-content">
-                <div id="res-arrow" style="font-size: 3.5rem;">↑</div>
-                <div class="res-dir" id="res-dir">CALL</div>
-                <div class="res-acc" id="res-acc">ACCURACY: 98%</div>
-            </div>
-        </div>
-        
-        <div class="card" style="background: transparent; border: none;">
-            <div class="label" id="res-time-label">SIGNAL ACTIVE: 1 MIN</div>
-            <div class="progress-container"><div class="progress-bar" id="p-bar"></div></div>
-        </div>
-
-        <button class="glow-btn" style="background: transparent; border: 1px solid var(--border); color: #fff;" onclick="location.reload()">ABORT SIGNAL</button>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        const assets = {
-            std: ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "AUD/CAD", "BTC/USD", "ETH/USD", "XAU/USD"],
-            otc: ["EUR/USD (OTC)", "GBP/USD (OTC)", "USD/JPY (OTC)", "AUD/CAD (OTC)", "NZD/USD (OTC)", "Apple (OTC)", "Gold (OTC)"]
-        };
-
-        // Matrix Background
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "0101010101010101"; const fontSize = 14;
-        const columns = canvas.width / fontSize; const drops = Array(Math.floor(columns)).fill(1);
-        function drawMatrix() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--neon');
-            ctx.font = fontSize + "px monospace";
-            drops.forEach((y, i) => {
-                const text = letters[Math.floor(Math.random() * letters.length)];
-                ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-        setInterval(drawMatrix, 50);
-
-        function setMode(m) {
-            document.querySelectorAll('.sw-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(m + '-mode').classList.add('active');
-            const s = document.getElementById('pairs'); s.innerHTML = '';
-            assets[m].forEach(p => s.innerHTML += `<option value="${p}">${p}</option>`);
-            updateVol();
-        }
-        setMode('std');
-
-        function updateVol() {
-            document.getElementById('vol-fill').style.width = Math.floor(40 + Math.random() * 55) + "%";
-        }
-
-        async function startNeural() {
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('analysis-screen').style.display = 'flex';
-            const logBox = document.getElementById('logs');
-            const lines = [
-                "> INITIALIZING TITAN_V5 CORE...",
-                "> SCANNING LIQUIDITY POOLS...",
-                "> CALCULATING FIBONACCI LEVELS...",
-                "> DETECTING INSTITUTIONAL ORDER BLOCKS...",
-                "> ANALYZING VOLATILITY INDEX...",
-                "> SIGNAL GENERATED SUCCESSFULLY."
-            ];
-            for (let l of lines) {
-                logBox.innerHTML += `<div style="margin-bottom:10px;">${l}</div>`;
-                await new Promise(r => setTimeout(r, 450));
-            }
-            showResult();
-        }
-
-        function showResult() {
-            tg.HapticFeedback.notificationOccurred('success');
-            // Sound effect
-            const audio = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
-            audio.play().catch(() => {});
-
-            document.getElementById('analysis-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'block';
-
-            const pair = document.getElementById('pairs').value;
-            const time = document.getElementById('time').value;
-            const isUp = Math.random() > 0.5;
-            const acc = (93 + Math.random() * 6).toFixed(1);
-
-            document.getElementById('res-pair').innerText = pair;
-            document.getElementById('res-acc').innerText = `CONFIDENCE: ${acc}%`;
-            document.getElementById('res-time-label').innerText = `SIGNAL ACTIVE: ${time} MIN`;
-            
-            const dir = document.getElementById('res-dir');
-            const arrow = document.getElementById('res-arrow');
-            const circle = document.getElementById('circle');
-
-            if(isUp) {
-                dir.innerText = "CALL"; arrow.innerText = "↑";
-                document.documentElement.style.setProperty('--neon', '#00ff88');
-            } else {
-                dir.innerText = "PUT"; arrow.innerText = "↓";
-                document.documentElement.style.setProperty('--neon', '#ff3e3e');
-            }
-
-            const bar = document.getElementById('p-bar');
-            bar.style.width = '100%'; bar.style.transition = 'none';
-            setTimeout(() => {
-                bar.style.transition = `width ${time * 60}s linear`;
-                bar.style.width = '0%';
-            }, 100);
         }
     </script>
 </body>
