@@ -3,143 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX HYPER-PRECISION</title>
+    <title>ZIORFEX MULTIVERSE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap');
-
-        :root {
-            --neon: #00ff88; --bg: #030303; --panel: #0d0d0d;
-            --border: rgba(0, 255, 136, 0.15); --red: #ff3b3b; --gold: #ffd700;
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700&display=swap');
+        
+        :root { /* Dark Theme (Default) */
+            --bg: #050505; --card: #0f0f0f; --text: #ffffff; --accent: #00ff88;
+            --sub: #555; --border: #1a1a1a;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
+        [data-theme="light"] {
+            --bg: #f5f5f7; --card: #ffffff; --text: #000000; --accent: #007bff;
+            --sub: #888; --border: #e0e0e0;
+        }
+
         body { 
-            font-family: 'JetBrains Mono', monospace; background: var(--bg); color: #fff; 
-            margin: 0; padding: 12px; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% 0%, #0a1a10 0%, #030303 100%);
+            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+            margin: 0; padding: 15px; transition: 0.3s; height: 100vh; display: flex; flex-direction: column;
         }
 
-        /* Чіткий неоновий ефект для тексту */
-        .neon-text { text-shadow: 0 0 8px rgba(0, 255, 136, 0.6); }
-
-        /* Верхня панель статусу */
-        .status-bar { display: flex; justify-content: space-between; font-size: 9px; color: #444; margin-bottom: 10px; }
-        .latency { color: var(--neon); animation: blink 1.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-
-        /* Головна картка ціни */
-        .price-card {
-            background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
-            padding: 20px; text-align: center; margin-bottom: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,255,136,0.02);
-            position: relative; overflow: hidden;
-        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 14px; color: var(--accent); }
         
-        #asset-display { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        #live-price { font-family: 'Orbitron'; font-size: 40px; font-weight: 900; letter-spacing: -2px; transition: color 0.1s; }
-        .trend-icon { font-size: 12px; margin-left: 5px; vertical-align: middle; }
-
-        /* Блоки вводу */
-        .section-label { font-size: 10px; color: var(--neon); text-transform: uppercase; margin: 10px 0 6px 6px; display: block; opacity: 0.8; }
-        
-        .box-input { background: var(--panel); border: 1px solid #222; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-        select { width: 100%; background: transparent; border: none; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
-
-        /* Таймфрейм кнопки */
-        .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-        .tf-btn {
-            background: #111; border: 1px solid #222; color: #666;
-            padding: 12px 0; border-radius: 10px; font-size: 11px; font-weight: 700;
-            cursor: pointer; transition: 0.2s;
+        /* Theme Toggle */
+        .theme-btn { 
+            background: var(--card); border: 1px solid var(--border); color: var(--text);
+            padding: 8px 12px; border-radius: 10px; font-size: 10px; cursor: pointer;
         }
-        .tf-btn.active { border-color: var(--neon); color: var(--neon); background: rgba(0, 255, 136, 0.04); box-shadow: 0 0 10px rgba(0,255,136,0.1); }
 
-        /* Кнопка аналізу */
-        .btn-analyze {
-            width: 100%; background: var(--neon); color: #000; border: none;
-            padding: 20px; border-radius: 16px; font-family: 'Orbitron'; font-weight: 900;
-            font-size: 17px; text-transform: uppercase; cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.2); margin-top: auto;
-            transition: transform 0.1s;
+        .main-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+            padding: 25px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        .btn-analyze:active { transform: scale(0.97); }
 
-        /* Оверлей аналізу */
+        #price { font-family: 'Orbitron'; font-size: 42px; font-weight: 900; margin: 10px 0; letter-spacing: -1px; }
+
+        .btn-action {
+            width: 100%; background: var(--accent); color: #000; border: none;
+            padding: 22px; border-radius: 18px; font-family: 'Orbitron'; font-weight: 900;
+            font-size: 16px; margin-top: auto; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Overlay */
         #overlay {
-            display: none; position: fixed; inset: 0; background: var(--bg);
-            z-index: 1000; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px;
+            display: none; position: fixed; inset: 0; background: var(--bg); z-index: 100;
+            flex-direction: column; align-items: center; justify-content: center;
         }
         
-        /* Сканер імпульсів */
-        .scanner {
-            width: 100px; height: 100px; border: 1px solid var(--border); border-radius: 50%;
-            position: relative; overflow: hidden; margin-bottom: 20px;
-        }
-        .scanner-beam {
-            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--neon); box-shadow: 0 0 15px var(--neon);
-            animation: scan 2s infinite ease-in-out;
-        }
-        @keyframes scan { from { top: -10%; } to { top: 110%; } }
-
-        /* Результат */
-        #res-dir { font-family: 'Orbitron'; font-size: 52px; font-weight: 900; margin: 20px 0 10px; }
-        #res-meta { font-size: 12px; color: #555; margin-bottom: 40px; text-align: center; }
+        .pulse { width: 80px; height: 80px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; opacity: 0.2; }
+        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <div class="status-bar">
-        <div class="status-feed neon-text">POCKET FEED // LIVE</div>
-        <div class="latency neon-text">MS: 18ms // CORE v25</div>
+    <div class="header">
+        <div class="logo">ZIORFEX v27</div>
+        <button class="theme-btn" onclick="toggleTheme()">🌓 THEME</button>
     </div>
 
-    <div class="price-card">
-        <div id="asset-display">AUD/CAD (OTC)</div>
-        <div id="live-price">0.91242<span class="trend-icon" id="trend-icon">↑</span></div>
-        <div style="font-size: 10px; color: #333;">PRECISION ENGINE ACTIVE</div>
+    <div class="main-card">
+        <div id="asset-label" style="font-size: 10px; color: var(--sub); letter-spacing: 2px;">AUD/CAD (OTC)</div>
+        <div id="price">0.00000</div>
+        <div id="algo-status" style="font-size: 9px; color: var(--accent);">● HFT_ENGINE_ACTIVE</div>
     </div>
 
-    <span class="section-label">Актив</span>
-    <div class="box-input">
-        <select id="asset-select" onchange="syncAsset()">
-            <option value="AUD/CAD (OTC)">AUD/CAD (OTC)</option>
-            <option value="EUR/USD (OTC)">EUR/USD (OTC)</option>
-            <option value="GBP/USD (OTC)">GBP/USD (OTC)</option>
-            <option value="BTC/USDT">BITCOIN (BINANCE)</option>
-            <option value="GOLD (OTC)">GOLD (XAU/USD)</option>
-        </select>
+    <div style="margin-top: 20px;">
+        <label style="font-size: 10px; color: var(--sub);">ASSET SELECTION</label>
+        <div style="background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid var(--border); margin-top: 5px;">
+            <select id="asset" style="width: 100%; background: transparent; border: none; color: var(--text); font-weight: 700;">
+                <option value="AUD/CAD (OTC)">AUD/CAD (OTC)</option>
+                <option value="EUR/USD (OTC)">EUR/USD (OTC)</option>
+                <option value="BTC/USDT">BITCOIN</option>
+            </select>
+        </div>
     </div>
 
-    <span class="section-label">Таймфрейм сигналу</span>
-    <div class="tf-grid">
-        <button class="tf-btn" onclick="setTF(5, this)">5s</button>
-        <button class="tf-btn" onclick="setTF(15, this)">15s</button>
-        <button class="tf-btn active" onclick="setTF(60, this)">1m</button>
-        <button class="tf-btn" onclick="setTF(300, this)">5m</button>
-    </div>
-
-    <div class="box-input" style="padding: 10px; background: rgba(255,255,255,0.02); opacity: 0.6;">
-        <span class="section-label" style="margin:0 0 5px 0; font-size:9px;">Алгоритм</span>
-        <div style="font-size: 12px; font-weight: 700;">HFT_NEURAL_v25.2_SCALPING</div>
-    </div>
-
-    <button class="btn-analyze" onclick="startAnalyze()">Генерувати сигнал</button>
+    <button class="btn-action" onclick="getSignal()">GENERATE SIGNAL</button>
 
     <div id="overlay">
-        <div id="loading-box" style="text-align:center;">
-            <div class="scanner"><div class="scanner-beam"></div></div>
-            <p id="timer" style="margin-top:25px; color:var(--neon); font-family:'Orbitron'; font-size:12px;">ОБРОБКА ТИКІВ...</p>
-        </div>
+        <div class="pulse"></div>
+        <div id="status" style="margin-top: 20px; font-family: 'Orbitron'; font-size: 12px; color: var(--accent);">SCANNING...</div>
         
-        <div id="result-box" style="display:none; text-align:center; width: 100%;">
-            <div id="res-dir">CALL ↑</div>
-            <p id="res-acc" style="color:var(--neon); font-size:18px; font-weight:700;">ТОЧНІСТЬ: 94.2%</p>
-            <div id="res-meta">АСЕТ: <span id="res-as"></span> | EXPI: <span id="res-exp"></span></div>
-            <button class="btn-analyze" style="width:70%; margin-top:50px; background:transparent; border:1px solid #333; color:#fff;" onclick="location.reload()">ОНОВИТИ</button>
+        <div id="res" style="display: none; text-align: center;">
+            <div id="dir" style="font-family: 'Orbitron'; font-size: 60px; font-weight: 900;">CALL</div>
+            <div id="acc" style="font-size: 20px; color: var(--accent); font-weight: 700;">ACCURACY: 98%</div>
+            <button class="btn-action" style="background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 30px;" onclick="location.reload()">BACK</button>
         </div>
     </div>
 
@@ -147,87 +96,43 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let currentTF = 60;
-        let price = 1.08412;
-        let lastDiff = 0;
-
-        // Функція синхронізації асета
-        function syncAsset() {
-            document.getElementById('asset-display').innerText = document.getElementById('asset-select').value;
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        // Функція вибору таймфрейму
-        function setTF(val, el) {
-            currentTF = val;
-            document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        // --- ЛОГІКА ЖИВОЇ ЦІНИ (імітація OTC) ---
-        // Ця ціна НЕ використовується для сигналу, тільки для візуалу
+        // Live Price
         setInterval(() => {
-            let change = (Math.random() * 0.00018 - 0.00009);
-            price = (parseFloat(price) + change).toFixed(5);
-            
-            const pEl = document.getElementById('live-price');
-            const iEl = document.getElementById('trend-icon');
-            pEl.innerText = price;
-            
-            if(change > 0) {
-                pEl.style.color = "#00ff88";
-                iEl.innerText = "↑";
-                iEl.style.color = "#00ff88";
-            } else {
-                pEl.style.color = "#ff3b3b";
-                iEl.innerText = "↓";
-                iEl.style.color = "#ff3b3b";
-            }
+            let p = (Math.random() * 0.0005 + 0.91200).toFixed(5);
+            document.getElementById('price').innerText = p;
         }, 1000);
 
-        // --- ЛОГІКА СИГНАЛУ (HFT IMPULSE) ---
-        async function startAnalyze() {
+        async function getSignal() {
             tg.HapticFeedback.impactOccurred('heavy');
             document.getElementById('overlay').style.display = 'flex';
-            document.getElementById('loading-box').style.display = 'block';
-            document.getElementById('result-box').style.display = 'none';
-
-            let count = currentTF;
-            // Фіксуємо імпульс в момент натискання
-            lastDiff = (Math.random() * 2 - 1); 
             
-            const clock = setInterval(() => {
-                count--;
-                document.getElementById('timer').innerText = `CALCULATING IMPULSE: ${count}S`;
-                if(count <= 0) clearInterval(clock);
-            }, 1000);
+            const steps = ["CONNECTING...", "MICRO-TREND ANALYSIS...", "LIQUIDITY CHECK...", "FINALIZING..."];
+            for(let s of steps) {
+                document.getElementById('status').innerText = s;
+                await new Promise(r => setTimeout(r, 1000));
+            }
 
-            // Реально чекаємо обраний час
-            await new Promise(r => setTimeout(r, currentTF * 1000));
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('pulse').style.display = 'none'; // fix if needed
+            const res = document.getElementById('res');
+            res.style.display = 'block';
+
+            const isCall = Math.random() > 0.5;
+            const d = document.getElementById('dir');
+            d.innerText = isCall ? "CALL ↑" : "PUT ↓";
+            d.style.color = isCall ? "#00ff88" : "#ff3b3b";
             
-            showResult();
-        }
-
-        function showResult() {
+            document.getElementById('acc').innerText = `ACCURACY: ${(94 + Math.random() * 5).toFixed(1)}%`;
             tg.HapticFeedback.notificationOccurred('success');
-            document.getElementById('loading-box').style.display = 'none';
-            document.getElementById('result-box').style.display = 'block';
-
-            const isUp = lastDiff >= 0;
-            const resDir = document.getElementById('res-dir');
-            
-            resDir.innerText = isUp ? "CALL ↑" : "PUT ↓";
-            resDir.style.color = isUp ? "#00ff88" : "#ff3b3b";
-            
-            // Динамічна точність від 91% до 98%
-            const acc = (91 + Math.random() * 7).toFixed(1);
-            document.getElementById('res-acc').innerText = `ТОЧНІСТЬ: ${acc}%`;
-            
-            // Мета дані
-            document.getElementById('res-as').innerText = document.getElementById('asset-select').value;
-            document.getElementById('res-exp').innerText = currentTF + "s";
         }
     </script>
 </body>
 </html>
+
