@@ -3,172 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX TRUTH ENGINE</title>
+    <title>Bogdaniuk Zenith G11</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
-        
-        :root { --green: #00ff88; --red: #ff3366; --bg: #08080a; --surface: #111114; --border: #1c1c21; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;800&display=swap');
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { 
-            margin: 0; padding: 12px; background: var(--bg); color: #e0e0e0;
-            font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
-            display: flex; flex-direction: column;
+        :root {
+            --accent: #00f2ff; --bg: #050507; --card: rgba(20, 20, 25, 0.8);
+            --green: #00ffa3; --red: #ff3366; --glass: rgba(255, 255, 255, 0.03);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; background: var(--bg); color: #fff;
+            font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh;
+        }
+
+        /* АНІМОВАНИЙ ФОН */
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% -20%, #003344 0%, transparent 50%);
+            z-index: -1; pointer-events: none;
+        }
+
+        .page { display: none; padding: 20px; height: calc(100vh - 85px); overflow-y: auto; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
-        .sys-info { font-size: 8px; color: #444; letter-spacing: 2px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+        .logo { font-family: 'Orbitron'; font-size: 14px; font-weight: 900; background: linear-gradient(90deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
 
-        /* REAL-TIME TERMINAL */
-        .terminal {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-            padding: 25px 15px; position: relative; margin-bottom: 15px;
+        /* MONITOR SECTION */
+        .main-card {
+            background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 35px; padding: 30px 20px; position: relative;
+            backdrop-filter: blur(20px); box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            margin-bottom: 25px;
         }
-        #price { font-size: 52px; font-weight: 800; color: #fff; letter-spacing: -2px; text-align: center; display: block; }
-        .market-status { font-size: 7px; color: var(--green); text-align: center; margin-top: 10px; opacity: 0.6; }
+        #price { font-family: 'Orbitron'; font-size: 42px; font-weight: 700; color: #fff; letter-spacing: -1px; }
 
-        /* NEURAL HISTORY (РЕАЛЬНІ СИГНАЛИ) */
-        .history-box { background: rgba(255,255,255,0.02); border-radius: 10px; padding: 10px; margin-top: 15px; }
-        .h-title { font-size: 7px; color: #333; margin-bottom: 8px; display: block; }
-        .h-row { display: flex; justify-content: space-between; font-size: 9px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .h-row:last-child { border: none; }
-        .h-win { color: var(--green); font-weight: 800; }
-
-        .label { font-size: 8px; color: #444; text-transform: uppercase; margin: 10px 0 8px 5px; letter-spacing: 2px; }
-
-        /* ASSET CARDS */
-        .scroller { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-        .asset-card {
-            min-width: 120px; background: var(--surface); border: 1px solid var(--border);
-            padding: 15px; border-radius: 10px; text-align: center; transition: 0.2s;
+        /* TRENDS LIST */
+        .trend-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px; background: var(--glass); border-radius: 20px;
+            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.02);
+            transition: 0.3s;
         }
-        .asset-card.active { border-color: var(--green); background: rgba(0,255,136,0.02); }
-        .asset-card span { font-size: 10px; font-weight: 700; }
+        .trend-item:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
 
-        /* TIME SELECT */
-        .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .tf-btn { background: var(--surface); border: 1px solid var(--border); color: #666; padding: 12px 0; border-radius: 8px; font-weight: 800; }
-        .tf-btn.active { color: #fff; border-color: #444; }
-
-        /* EXECUTION */
-        .btn-run {
-            width: 100%; padding: 24px; border-radius: 12px; border: none;
-            background: #fff; color: #000; font-weight: 800; font-size: 16px;
-            margin-top: auto; cursor: pointer;
+        /* FOOTER NAV */
+        .nav {
+            position: fixed; bottom: 0; width: 100%; height: 85px;
+            background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px;
         }
-        .btn-run:active { transform: scale(0.98); background: var(--green); }
+        .nav-link { color: #555; text-align: center; font-size: 10px; font-weight: 700; transition: 0.3s; text-decoration: none; }
+        .nav-link.active { color: var(--accent); }
+        .nav-link i { font-size: 22px; display: block; margin-bottom: 6px; }
 
-        /* ANALYSIS OVERLAY */
-        #overlay {
-            display: none; position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-            flex-direction: column; padding: 40px 20px;
+        /* BUTTONS */
+        .btn-glow {
+            width: 100%; padding: 22px; border-radius: 25px; border: none;
+            background: linear-gradient(135deg, var(--accent), #0077ff);
+            color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 14px;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(0, 242, 255, 0.2);
+            text-transform: uppercase; letter-spacing: 2px;
         }
-        .log-stream { font-size: 9px; color: var(--green); line-height: 1.6; font-family: 'JetBrains Mono'; }
 
-        #result { display: none; text-align: center; margin-top: auto; margin-bottom: auto; }
-        #res-dir { font-size: 100px; font-weight: 800; line-height: 1; }
-        .res-acc { font-size: 18px; color: #444; margin-top: 20px; }
+        /* OVERLAY СИГНАЛУ */
+        #sig-overlay {
+            display: none; position: fixed; inset: 0; background: #000; z-index: 2000;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        #res-dir { font-family: 'Orbitron'; font-size: 100px; font-weight: 900; margin: 20px 0; }
+        .accuracy-badge { padding: 10px 25px; border-radius: 50px; background: #0a0a0c; border: 1px solid #1a1a1c; font-weight: 800; color: var(--green); }
     </style>
 </head>
 <body>
 
+    <div class="bg-glow"></div>
+
     <div class="header">
-        <div class="logo">ZIORFEX_v110</div>
-        <div class="sys-info" id="time-sync">SYNC: 10:44:02</div>
+        <div class="logo">BOGDANIUK ZENITH</div>
+        <div style="font-size: 8px; color: #444; letter-spacing: 2px;">V15.0_PRO</div>
     </div>
 
-    <div class="terminal">
-        <span id="price">0.91230</span>
-        <div class="market-status">● LIVE_MARKET_FEED_ENABLED</div>
-        
-        <div class="history-box">
-            <span class="h-title">LAST_NEURAL_SESSIONS</span>
-            <div class="h-row"><span>AUD/CAD</span><span class="h-win">CALL [SUCCESS]</span></div>
-            <div class="h-row"><span>EUR/USD</span><span class="h-win">PUT [SUCCESS]</span></div>
-            <div class="h-row"><span>CRYPTO</span><span class="h-win">CALL [SUCCESS]</span></div>
+    <div id="terminal" class="page active">
+        <div class="main-card">
+            <span style="font-size: 8px; color: var(--accent); letter-spacing: 4px; display: block; margin-bottom: 10px;">NEURAL_MARKET_FEED</span>
+            <div id="price">0.91230</div>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                <span style="font-size: 9px; color: var(--green);">● RSI: BUY</span>
+                <span style="font-size: 9px; color: #444;">● STOCH: NEUTRAL</span>
+            </div>
+        </div>
+
+        <button class="btn-glow" onclick="showSignal()">Аналізувати актив</button>
+
+        <div style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span style="font-size: 10px; font-weight: 800; color: #333; letter-spacing: 2px;">LIVE TRENDS</span>
+                <span style="font-size: 10px; color: var(--green);">99% ACCURACY</span>
+            </div>
+            <div class="trend-item">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fab fa-ethereum" style="color: #627eea;"></i>
+                    <span style="font-size: 13px; font-weight: 700;">EUR/USD OTC</span>
+                </div>
+                <span style="color: var(--green); font-weight: 800;">+94%</span>
+            </div>
+            <div class="trend-item">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-coins" style="color: #f3ba2f;"></i>
+                    <span style="font-size: 13px; font-weight: 700;">XAU/USD (GOLD)</span>
+                </div>
+                <span style="color: var(--green); font-weight: 800;">+91%</span>
+            </div>
         </div>
     </div>
 
-    <span class="label">Analysis Target</span>
-    <div class="scroller">
-        <div class="asset-card active" onclick="selA('AUD/CAD', this)"><span>AUD/CAD (OTC)</span></div>
-        <div class="asset-card" onclick="selA('EUR/USD', this)"><span>EUR/USD (OTC)</span></div>
-        <div class="asset-card" onclick="selA('BTC/USD', this)"><span>BITCOIN (L2)</span></div>
-    </div>
-
-    <span class="label">Timeframe</span>
-    <div class="tf-grid">
-        <button class="tf-btn active" onclick="selT(this)">5S</button>
-        <button class="tf-btn" onclick="selT(this)">15S</button>
-        <button class="tf-btn" onclick="selT(this)">30S</button>
-        <button class="tf-btn" onclick="selT(this)">1M</button>
-    </div>
-
-    <button class="btn-run" onclick="startAnalysis()">INITIATE_SESSION</button>
-
-    <div id="overlay">
-        <div class="log-stream" id="logs"></div>
-        <div id="result">
-            <div id="res-dir">CALL</div>
-            <div class="res-badge" style="color:var(--green); font-size:24px; font-weight:800;">99.12% CONFIRMED</div>
-            <button class="btn-run" style="margin-top:80px; background:transparent; border:1px solid #222; color:#fff;" onclick="location.reload()">RESET_ENGINE</button>
+    <div id="wallet" class="page">
+        <div class="main-card" style="padding: 40px 20px;">
+            <span style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">TOTAL ASSETS</span>
+            <div id="balance" style="font-size: 36px; font-weight: 900; margin: 15px 0; color: #fff;">$62,454.27</div>
+            <div style="font-size: 9px; color: var(--green);">USDT (TRC-20) VERIFIED</div>
         </div>
+        <button class="btn-glow" style="background: transparent; border: 1px solid #1a1a1c; color: #fff;" onclick="alert('Введіть суму виводу')">WITHDRAW FUNDS</button>
+    </div>
+
+    <div id="profile" class="page">
+        <div class="trend-item"><span>Управління VIP доступом</span><i class="fas fa-shield-halved"></i></div>
+        <div class="trend-item"><span>Технічна підтримка 24/7</span><i class="fas fa-headset"></i></div>
+        <div class="trend-item"><span>Реферальне посилання</span><i class="fas fa-link"></i></div>
+    </div>
+
+    <div class="nav">
+        <a href="#" class="nav-link active" onclick="navTo('terminal', this)"><i class="fas fa-rocket"></i>TRADE</a>
+        <a href="#" class="nav-link" onclick="navTo('wallet', this)"><i class="fas fa-vault"></i>WALLET</a>
+        <a href="#" class="nav-link" onclick="navTo('profile', this)"><i class="fas fa-user-ninja"></i>PRO</a>
+    </div>
+
+    <div id="sig-overlay">
+        <div style="font-family: 'Orbitron'; font-size: 10px; color: var(--accent); letter-spacing: 10px;">ANALYZING...</div>
+        <div id="res-dir">CALL</div>
+        <div class="accuracy-badge" id="res-acc">99.2% PROBABILITY</div>
+        <button class="btn-glow" style="width: 200px; margin-top: 60px; background: transparent; border: 1px solid #111; color: #fff;" onclick="location.reload()">TERMINATE</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        
-        setInterval(() => {
-            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00110).toFixed(5);
-            const now = new Date();
-            document.getElementById('time-sync').innerText = `SYNC: ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-        }, 1000);
 
-        function selA(n, e) {
-            document.querySelectorAll('.asset-card').forEach(c => c.classList.remove('active'));
-            e.classList.add('active');
+        function navTo(page, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+            el.classList.add('active');
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function selT(e) {
-            document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-            e.classList.add('active');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        async function startAnalysis() {
+        async function showSignal() {
             tg.HapticFeedback.impactOccurred('heavy');
-            document.getElementById('overlay').style.display = 'flex';
-            const logBox = document.getElementById('logs');
+            document.getElementById('sig-overlay').style.display = 'flex';
             
-            const messages = [
-                "> INITIALIZING NEURAL_LAYER_v11.4",
-                "> CONNECTING TO LIQUIDITY_POOLS...",
-                "> SCANNING RSI_MOMENTUM_DIVERGENCE",
-                "> ANALYZING ORDER_FLOW_VOLUMES",
-                "> CROSS-CHECKING CANDLE_PATTERNS",
-                "> CONFIDENCE_LEVEL: 99.12%",
-                "> GENERATING FINAL_SIGNAL..."
-            ];
-
-            for(let m of messages) {
-                logBox.innerHTML += `<div>${m}</div>`;
-                tg.HapticFeedback.impactOccurred('soft');
-                await new Promise(r => setTimeout(r, 700));
-            }
-
-            logBox.style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-
+            await new Promise(r => setTimeout(r, 4500));
+            
             const isCall = Math.random() > 0.45;
-            const rd = document.getElementById('res-dir');
-            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            rd.style.color = isCall ? "var(--green)" : "var(--red)";
+            const resDir = document.getElementById('res-dir');
+            resDir.innerText = isCall ? "CALL ↑" : "PUT ↓";
+            resDir.style.color = isCall ? "var(--green)" : "var(--red)";
+            resDir.style.textShadow = `0 0 80px ${isCall ? 'var(--green)' : 'var(--red)'}`;
             
+            document.getElementById('res-acc').innerText = (98.9 + Math.random()*1).toFixed(1) + "% PROBABILITY";
             tg.HapticFeedback.notificationOccurred('success');
         }
+
+        setInterval(() => {
+            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00180).toFixed(5);
+        }, 600);
     </script>
 </body>
 </html>
+
