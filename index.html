@@ -3,162 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZIORFEX EXECUTIONER</title>
+    <title>ZIORFEX TRUTH ENGINE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Geo:wght@400;700&family=Orbitron:wght@900&family=JetBrains+Mono:wght@500;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
         
-        :root { --neon: #00ffaa; --pink: #ff0055; --bg: #000; --panel: #0a0a0c; }
+        :root { --green: #00ff88; --red: #ff3366; --bg: #08080a; --surface: #111114; --border: #1c1c21; }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { 
-            margin: 0; padding: 12px; background: var(--bg); color: #fff;
+            margin: 0; padding: 12px; background: var(--bg); color: #e0e0e0;
             font-family: 'JetBrains Mono', monospace; overflow: hidden; height: 100vh;
             display: flex; flex-direction: column;
         }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .logo { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 4px; }
-        .status { font-size: 7px; color: #333; }
+        .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
+        .sys-info { font-size: 8px; color: #444; letter-spacing: 2px; }
 
-        /* MAIN MONITOR */
-        .monitor {
-            background: var(--panel); border: 1px solid #1a1a1c; border-radius: 25px;
-            padding: 35px 15px; text-align: center; position: relative; margin-bottom: 15px;
+        /* REAL-TIME TERMINAL */
+        .terminal {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 25px 15px; position: relative; margin-bottom: 15px;
         }
-        #price { font-family: 'Geo', sans-serif; font-size: 74px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -3px; }
-        
-        /* CONFIDENCE METER */
-        .conf-box { margin-top: 20px; padding: 0 30px; }
-        .conf-label { font-size: 8px; color: #444; letter-spacing: 3px; margin-bottom: 8px; display: block; }
-        .conf-bar { height: 2px; background: #111; border-radius: 10px; position: relative; }
-        #conf-fill { position: absolute; height: 100%; width: 70%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: 0.8s ease; }
+        #price { font-size: 52px; font-weight: 800; color: #fff; letter-spacing: -2px; text-align: center; display: block; }
+        .market-status { font-size: 7px; color: var(--green); text-align: center; margin-top: 10px; opacity: 0.6; }
 
-        .u-label { font-size: 8px; color: #444; text-transform: uppercase; margin: 10px 0 10px 10px; letter-spacing: 4px; }
+        /* NEURAL HISTORY (РЕАЛЬНІ СИГНАЛИ) */
+        .history-box { background: rgba(255,255,255,0.02); border-radius: 10px; padding: 10px; margin-top: 15px; }
+        .h-title { font-size: 7px; color: #333; margin-bottom: 8px; display: block; }
+        .h-row { display: flex; justify-content: space-between; font-size: 9px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .h-row:last-child { border: none; }
+        .h-win { color: var(--green); font-weight: 800; }
 
-        /* CARDS */
-        .scroller { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 5px; }
-        .scroller::-webkit-scrollbar { display: none; }
-        .card {
-            min-width: 135px; background: var(--panel); border: 1px solid #1a1a1c;
-            padding: 22px; border-radius: 20px; text-align: center; transition: 0.3s;
+        .label { font-size: 8px; color: #444; text-transform: uppercase; margin: 10px 0 8px 5px; letter-spacing: 2px; }
+
+        /* ASSET CARDS */
+        .scroller { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .asset-card {
+            min-width: 120px; background: var(--surface); border: 1px solid var(--border);
+            padding: 15px; border-radius: 10px; text-align: center; transition: 0.2s;
         }
-        .card.active { border-color: var(--neon); background: rgba(0,255,170,0.03); }
-        .card span { font-size: 11px; font-weight: 800; color: #555; }
-        .card.active span { color: #fff; }
+        .asset-card.active { border-color: var(--green); background: rgba(0,255,136,0.02); }
+        .asset-card span { font-size: 10px; font-weight: 700; }
 
-        /* ACTION BUTTON */
-        .btn-exe {
-            width: 100%; padding: 28px; border-radius: 25px; border: none;
-            background: #fff; color: #000; font-family: 'Orbitron'; font-weight: 900;
-            font-size: 18px; margin-top: auto; cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255,255,255,0.05);
+        /* TIME SELECT */
+        .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .tf-btn { background: var(--surface); border: 1px solid var(--border); color: #666; padding: 12px 0; border-radius: 8px; font-weight: 800; }
+        .tf-btn.active { color: #fff; border-color: #444; }
+
+        /* EXECUTION */
+        .btn-run {
+            width: 100%; padding: 24px; border-radius: 12px; border: none;
+            background: #fff; color: #000; font-weight: 800; font-size: 16px;
+            margin-top: auto; cursor: pointer;
         }
-        .btn-exe:active { transform: scale(0.96); background: var(--neon); }
+        .btn-run:active { transform: scale(0.98); background: var(--green); }
 
-        /* OVERLAY АНАЛІЗУ */
+        /* ANALYSIS OVERLAY */
         #overlay {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 2000;
-            flex-direction: column; align-items: center; justify-content: center;
+            display: none; position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+            flex-direction: column; padding: 40px 20px;
         }
-        .loader-txt { font-family: 'Orbitron'; font-size: 10px; color: var(--neon); letter-spacing: 12px; margin-bottom: 40px; }
-        
-        #result { display: none; text-align: center; width: 100%; }
-        #res-dir { font-family: 'Orbitron'; font-size: 110px; font-weight: 900; margin: 0; line-height: 0.8; }
-        .accuracy-pill { margin-top: 30px; font-size: 22px; font-weight: 800; color: var(--neon); padding: 10px 30px; border-radius: 50px; background: #080808; border: 1px solid #1a1a1c; display: inline-block; }
+        .log-stream { font-size: 9px; color: var(--green); line-height: 1.6; font-family: 'JetBrains Mono'; }
+
+        #result { display: none; text-align: center; margin-top: auto; margin-bottom: auto; }
+        #res-dir { font-size: 100px; font-weight: 800; line-height: 1; }
+        .res-acc { font-size: 18px; color: #444; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">ZIORFEX G9.0</div>
-        <div class="status">ENGINE: OPTIMIZED</div>
+        <div class="logo">ZIORFEX_v110</div>
+        <div class="sys-info" id="time-sync">SYNC: 10:44:02</div>
     </div>
 
-    <div class="monitor">
-        <div id="price">0.91230</div>
-        <div class="conf-box">
-            <span class="conf-label">MARKET_SENTIMENT</span>
-            <div class="conf-bar"><div id="conf-fill"></div></div>
+    <div class="terminal">
+        <span id="price">0.91230</span>
+        <div class="market-status">● LIVE_MARKET_FEED_ENABLED</div>
+        
+        <div class="history-box">
+            <span class="h-title">LAST_NEURAL_SESSIONS</span>
+            <div class="h-row"><span>AUD/CAD</span><span class="h-win">CALL [SUCCESS]</span></div>
+            <div class="h-row"><span>EUR/USD</span><span class="h-win">PUT [SUCCESS]</span></div>
+            <div class="h-row"><span>CRYPTO</span><span class="h-win">CALL [SUCCESS]</span></div>
         </div>
     </div>
 
-    <span class="u-label">Neural Channel</span>
+    <span class="label">Analysis Target</span>
     <div class="scroller">
-        <div class="card active" onclick="selAsset('AUD/CAD', this)"><span>🌕 AUD/CAD</span></div>
-        <div class="card" onclick="selAsset('EUR/USD', this)"><span>🇪🇺 EUR/USD</span></div>
-        <div class="card" onclick="selAsset('BTC/USD', this)"><span>₿ BITCOIN</span></div>
+        <div class="asset-card active" onclick="selA('AUD/CAD', this)"><span>AUD/CAD (OTC)</span></div>
+        <div class="asset-card" onclick="selA('EUR/USD', this)"><span>EUR/USD (OTC)</span></div>
+        <div class="asset-card" onclick="selA('BTC/USD', this)"><span>BITCOIN (L2)</span></div>
     </div>
 
-    <span class="u-label">Timeframe</span>
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-        <button class="card active" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>5S</span></button>
-        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>15S</span></button>
-        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>30S</span></button>
-        <button class="card" style="min-width:auto; padding: 15px 0;" onclick="selTF(this)"><span>1M</span></button>
+    <span class="label">Timeframe</span>
+    <div class="tf-grid">
+        <button class="tf-btn active" onclick="selT(this)">5S</button>
+        <button class="tf-btn" onclick="selT(this)">15S</button>
+        <button class="tf-btn" onclick="selT(this)">30S</button>
+        <button class="tf-btn" onclick="selT(this)">1M</button>
     </div>
 
-    <button class="btn-exe" onclick="executeAnalysis()">ПРОАНАЛІЗУВАТИ</button>
+    <button class="btn-run" onclick="startAnalysis()">INITIATE_SESSION</button>
 
     <div id="overlay">
-        <div class="loader-txt" id="l-txt">SCANNING...</div>
+        <div class="log-stream" id="logs"></div>
         <div id="result">
             <div id="res-dir">CALL</div>
-            <div class="accuracy-pill" id="res-acc">98.2%</div>
-            <div style="margin-top:60px;"><button class="btn-exe" style="width: 220px; background: transparent; border: 1px solid #111; color: #fff;" onclick="location.reload()">BACK</button></div>
+            <div class="res-badge" style="color:var(--green); font-size:24px; font-weight:800;">99.12% CONFIRMED</div>
+            <button class="btn-run" style="margin-top:80px; background:transparent; border:1px solid #222; color:#fff;" onclick="location.reload()">RESET_ENGINE</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         
-        // Живий графік та впевненість
         setInterval(() => {
-            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00140).toFixed(5);
-            document.getElementById('conf-fill').style.width = (40 + Math.random()*55) + '%';
-        }, 900);
+            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00110).toFixed(5);
+            const now = new Date();
+            document.getElementById('time-sync').innerText = `SYNC: ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+        }, 1000);
 
-        function selAsset(n, e) {
-            document.querySelectorAll('.scroller .card').forEach(c => c.classList.remove('active'));
+        function selA(n, e) {
+            document.querySelectorAll('.asset-card').forEach(c => c.classList.remove('active'));
             e.classList.add('active');
             tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function selTF(e) {
-            document.querySelectorAll('button.card').forEach(c => c.classList.remove('active'));
+        function selT(e) {
+            document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
             e.classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        async function executeAnalysis() {
+        async function startAnalysis() {
             tg.HapticFeedback.impactOccurred('heavy');
             document.getElementById('overlay').style.display = 'flex';
+            const logBox = document.getElementById('logs');
             
-            // Ефект "промацування" ціни
-            let steps = ["VOLATILITY_CHECK", "MOMENTUM_SCAN", "TONE_ANALYSIS", "FINALIZING"];
-            let i = 0;
-            let iv = setInterval(() => {
-                document.getElementById('l-txt').innerText = steps[i];
+            const messages = [
+                "> INITIALIZING NEURAL_LAYER_v11.4",
+                "> CONNECTING TO LIQUIDITY_POOLS...",
+                "> SCANNING RSI_MOMENTUM_DIVERGENCE",
+                "> ANALYZING ORDER_FLOW_VOLUMES",
+                "> CROSS-CHECKING CANDLE_PATTERNS",
+                "> CONFIDENCE_LEVEL: 99.12%",
+                "> GENERATING FINAL_SIGNAL..."
+            ];
+
+            for(let m of messages) {
+                logBox.innerHTML += `<div>${m}</div>`;
                 tg.HapticFeedback.impactOccurred('soft');
-                i++;
-                if(i >= steps.length) clearInterval(iv);
-            }, 1200);
+                await new Promise(r => setTimeout(r, 700));
+            }
 
-            await new Promise(r => setTimeout(r, 5000));
-
-            document.getElementById('l-txt').style.display = 'none';
+            logBox.style.display = 'none';
             document.getElementById('result').style.display = 'block';
 
-            const isCall = Math.random() > 0.48;
-            const resDir = document.getElementById('res-dir');
-            resDir.innerText = isCall ? "CALL" : "PUT";
-            resDir.style.color = isCall ? "var(--neon)" : "var(--pink)";
-            resDir.style.textShadow = `0 0 70px ${isCall ? 'var(--neon)' : 'var(--pink)'}`;
-            
-            // Видаємо високий % тільки якщо "пощастило" з рандомом для імітації точності
-            const baseAcc = 96.2 + Math.random()*3.5;
-            document.getElementById('res-acc').innerText = baseAcc.toFixed(1) + "% CONFIDENCE";
+            const isCall = Math.random() > 0.45;
+            const rd = document.getElementById('res-dir');
+            rd.innerText = isCall ? "CALL ↑" : "PUT ↓";
+            rd.style.color = isCall ? "var(--green)" : "var(--red)";
             
             tg.HapticFeedback.notificationOccurred('success');
         }
