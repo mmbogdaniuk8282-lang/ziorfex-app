@@ -12,7 +12,7 @@
         .btn-blue { background: #0066ff; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .balance { font-size: 34px; font-weight: bold; color: #ffb800; text-align: center; margin: 15px 0; }
         .hidden { display: none; }
-        #overlay { display: none; position: fixed; inset: 0; background: #050507; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #sig-overlay { display: none; position: fixed; inset: 0; background: #050507; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .sig-val { font-size: 85px; font-weight: 900; margin: 20px 0; }
     </style>
 </head>
@@ -20,8 +20,8 @@
 
     <div id="login-box" class="card">
         <div class="label">User Identification</div>
-        <input type="number" id="uid-input" placeholder="Enter User ID (126750131)">
-        <button class="btn-blue" style="margin-top: 15px;" onclick="doLogin()">Login System</button>
+        <input type="number" id="uid-input" placeholder="Введите ваш ID (126750131)">
+        <button class="btn-blue" style="margin-top: 15px;" onclick="doLogin()">Войти в систему</button>
     </div>
 
     <div id="main-ui" class="hidden">
@@ -32,26 +32,26 @@
         </div>
 
         <div class="card">
-            <label class="label">Currency Pair</label>
+            <label class="label">Выберите актив</label>
             <select id="asset-select"></select>
 
-            <label class="label" style="display: block; margin-top: 15px;">Timeframe</label>
+            <label class="label" style="display: block; margin-top: 15px;">Время экспирации</label>
             <select id="tf-select">
-                <option value="1m">1 MINUTE</option>
-                <option value="3m">3 MINUTES</option>
-                <option value="5m">5 MINUTES</option>
-                <option value="15m">15 MINUTES</option>
-                <option value="30m">30 MINUTES</option>
+                <option value="1m">1 МИНУТА</option>
+                <option value="3m">3 МИНУТЫ</option>
+                <option value="5m">5 МИНУТ</option>
+                <option value="15m">15 МИНУТ</option>
+                <option value="30m">30 МИНУТ</option>
             </select>
         </div>
-        <button class="btn-blue" onclick="getSignal()">Process Signal</button>
+        <button class="btn-blue" onclick="getSignal()">Получить сигнал</button>
     </div>
 
-    <div id="overlay">
+    <div id="sig-overlay">
         <div class="label" id="info-top"></div>
         <div id="sig-res" class="sig-val"></div>
         <div id="sig-acc" style="color: #00ffaa; font-weight: bold; font-size: 18px;"></div>
-        <button class="btn-blue" style="width: 200px; background: transparent; border: 1px solid #333; margin-top: 50px;" onclick="document.getElementById('overlay').style.display='none'">Back</button>
+        <button class="btn-blue" style="width: 200px; background: transparent; border: 1px solid #333; margin-top: 50px;" onclick="document.getElementById('sig-overlay').style.display='none'">Назад</button>
     </div>
 
     <script>
@@ -59,7 +59,7 @@
 
         function doLogin() {
             let id = document.getElementById('uid-input').value;
-            ws.send(json_msg('login', { user_id: id }));
+            ws.send(JSON.stringify({ action: 'login', user_id: id }));
         }
 
         ws.onmessage = (e) => {
@@ -74,7 +74,7 @@
                     let o = document.createElement('option');
                     o.value = a; o.innerText = a; sel.appendChild(o);
                 });
-            } else if (d.type === 'login_res') { alert(d.msg); }
+            } else if (d.type === 'login_res') { alert("ОШИБКА: " + d.msg); }
 
             if(d.type === 'signal') {
                 document.getElementById('info-top').innerText = d.asset + " [" + d.tf.toUpperCase() + "]";
@@ -85,14 +85,13 @@
         };
 
         function getSignal() {
-            document.getElementById('overlay').style.display = 'flex';
-            ws.send(json_msg('get_signal', {
+            document.getElementById('sig-overlay').style.display = 'flex';
+            ws.send(JSON.stringify({
+                action: 'get_signal',
                 asset: document.getElementById('asset-select').value,
                 timeframe: document.getElementById('tf-select').value
             }));
         }
-
-        function json_msg(action, params) { return JSON.stringify({ action: action, ...params }); }
     </script>
 </body>
 </html>
