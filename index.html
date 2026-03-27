@@ -3,74 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ziorfex Quantum</title>
+    <title>Ziorfex Pro Quantum</title>
     <style>
-        body { margin: 0; background: #050507; color: white; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; justify-content: space-between; padding: 20px; box-sizing: border-box; }
-        .balance-card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 20px; padding: 30px; text-align: center; }
-        .label { font-size: 8px; color: #444; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-        .value { font-size: 38px; font-weight: bold; color: #ffb800; margin-bottom: 15px; }
-        .status { font-size: 9px; padding: 5px 15px; border-radius: 20px; background: rgba(0,255,170,0.1); color: #00ffaa; border: 1px solid #00ffaa33; display: inline-block; }
-        .asset-card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .asset-name { font-weight: bold; font-size: 14px; }
-        .algo { font-size: 9px; color: #444; margin-top: 5px; }
-        .percent { color: #0066ff; font-weight: bold; }
-        .btn { background: #0066ff; color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 16px; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        body { margin: 0; background: #050507; color: white; font-family: 'Segoe UI', sans-serif; padding: 15px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .input-group { margin-bottom: 15px; }
+        label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; background: #111; border: 1px solid #1a1a1e; color: white; padding: 12px; border-radius: 10px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #0066ff; }
+        
+        .balance-val { font-size: 32px; font-weight: bold; color: #ffb800; text-align: center; margin: 10px 0; }
+        .status { font-size: 10px; text-align: center; color: #00ffaa; text-transform: uppercase; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-main { background: #0066ff; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin-top: auto; text-transform: uppercase; cursor: pointer; }
         
         /* Екран сигналу */
-        #signal-screen { display: none; position: fixed; inset: 0; background: #050507; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .signal-val { font-size: 80px; font-weight: 900; margin: 20px 0; }
-        .acc { color: #00ffaa; font-weight: bold; font-size: 20px; }
+        #sig-screen { display: none; position: fixed; inset: 0; background: #050507; z-index: 200; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+        .sig-box { font-size: 70px; font-weight: 900; margin: 20px 0; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div style="text-align: center; font-weight: bold; font-size: 14px; color: #444;">Ziorfex Trade Bot</div>
 
-    <div class="balance-card">
-        <div class="label">Real Pocket Balance</div>
-        <div id="balance" class="value">$2,975.53</div>
-        <div id="status" class="status">LIVE CONNECTION</div>
+    <div class="card">
+        <label>User ID / Session ID</label>
+        <input type="text" id="user-id" placeholder="Enter your ID...">
+        <div id="status" class="status" style="margin-top: 10px; color: #444;">Disconnected</div>
     </div>
 
-    <div class="asset-card">
-        <div>
-            <div class="asset-name">EUR/USD (OTC)</div>
-            <div class="algo">ALGORITHM: QUANTUM V3</div>
+    <div class="card">
+        <div class="balance-val" id="balance">$0.00</div>
+        <div class="status">Live Account Status</div>
+    </div>
+
+    <div class="card">
+        <div class="grid">
+            <div class="input-group">
+                <label>Asset</label>
+                <select id="asset">
+                    <option value="EUR/USD">EUR/USD (OTC)</option>
+                    <option value="BTC/USD">BTC/USD</option>
+                    <option value="ETH/USD">ETH/USD</option>
+                    <option value="GOLD">GOLD</option>
+                    <option value="APPLE">APPLE</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Timeframe</label>
+                <select id="timeframe">
+                    <option value="M1">1 MINUTE</option>
+                    <option value="M5">5 MINUTES</option>
+                    <option value="M15">15 MINUTES</option>
+                </select>
+            </div>
         </div>
-        <div class="percent">98.9%</div>
     </div>
 
-    <button class="btn" onclick="getSignal()">Get Signal</button>
+    <button class="btn-main" onclick="sendRequest()">Get Quantum Signal</button>
 
-    <div id="signal-screen">
-        <div class="label" style="font-size: 12px;">Analyzing Market...</div>
-        <div id="res" class="signal-val">...</div>
-        <div id="accuracy" class="acc"></div>
-        <button class="btn" style="background: transparent; border: 1px solid #1a1a1e; margin-top: 40px; width: 200px;" onclick="closeSignal()">Back</button>
+    <div id="sig-screen">
+        <div style="font-size: 12px; color: #0066ff; letter-spacing: 5px;">ANALYZING...</div>
+        <div id="asset-display" style="font-size: 14px; margin-top: 10px;"></div>
+        <div id="sig-res" class="sig-box">UP ↑</div>
+        <div id="sig-acc" style="color: #00ffaa; font-weight: bold;">98.2% ACCURACY</div>
+        <button class="btn-main" style="width: 200px; background: transparent; border: 1px solid #222; margin-top: 40px;" onclick="document.getElementById('sig-screen').style.display='none'">Back</button>
     </div>
 
     <script>
         let ws = new WebSocket('ws://127.0.0.1:8765');
         
+        ws.onopen = () => { document.getElementById('status').innerText = 'System Ready'; document.getElementById('status').style.color = '#00ffaa'; };
+        ws.onclose = () => { document.getElementById('status').innerText = 'Connection Lost'; document.getElementById('status').style.color = '#ff3366'; };
+
         ws.onmessage = (e) => {
-            let data = JSON.parse(e.data);
-            if(data.type === 'auth') document.getElementById('balance').innerText = '$' + data.balance;
-            if(data.type === 'signal') {
-                document.getElementById('res').innerText = data.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
-                document.getElementById('res').style.color = data.signal === 'UP' ? '#00ffaa' : '#ff3366';
-                document.getElementById('accuracy').innerText = data.acc + '% ACCURACY';
+            let d = JSON.parse(e.data);
+            if(d.type === 'auth') document.getElementById('balance').innerText = '$' + d.balance;
+            if(d.type === 'signal') {
+                document.getElementById('sig-res').innerText = d.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
+                document.getElementById('sig-res').style.color = d.signal === 'UP' ? '#00ffaa' : '#ff3366';
+                document.getElementById('sig-acc').innerText = d.acc + '% ACCURACY';
             }
         };
 
-        function getSignal() {
-            document.getElementById('signal-screen').style.display = 'flex';
-            document.getElementById('res').innerText = '...';
-            document.getElementById('accuracy').innerText = '';
-            ws.send(JSON.stringify({action: 'get_signal'}));
-        }
+        function sendRequest() {
+            let id = document.getElementById('user-id').value;
+            let asset = document.getElementById('asset').value;
+            let time = document.getElementById('timeframe').value;
+            
+            if(!id) { alert('Please enter User ID'); return; }
 
-        function closeSignal() { document.getElementById('signal-screen').style.display = 'none'; }
+            document.getElementById('asset-display').innerText = asset + ' (' + time + ')';
+            document.getElementById('sig-screen').style.display = 'flex';
+            
+            ws.send(JSON.stringify({
+                action: 'get_signal',
+                user_id: id,
+                asset: asset,
+                timeframe: time
+            }));
+        }
     </script>
 </body>
 </html>
-
