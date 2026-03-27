@@ -1,18 +1,89 @@
-// Правильна функція входу
-function login() {
-    let idValue = document.getElementById('id-input').value; // Твоє поле для ID
-    ws.send(JSON.stringify({ 
-        user_id: idValue // Відправляємо ID на сервер
-    }));
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziorfex Trade Bot</title>
+    <style>
+        body { margin: 0; background: #050507; color: white; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; }
+        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 20px; padding: 25px; margin-bottom: 20px; text-align: center; }
+        .label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .balance { font-size: 42px; font-weight: bold; color: #ffb800; margin: 10px 0; }
+        .status { display: inline-block; background: rgba(0, 255, 170, 0.1); color: #00ffaa; font-size: 10px; padding: 5px 15px; border-radius: 20px; text-transform: uppercase; }
+        
+        .asset-card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .asset-name { font-weight: bold; font-size: 16px; }
+        .accuracy { color: #0066ff; font-weight: bold; }
+        
+        select { width: 100%; background: #111; color: white; border: 1px solid #222; padding: 15px; border-radius: 12px; margin-top: 10px; outline: none; }
+        .btn-blue { position: fixed; bottom: 30px; left: 20px; right: 20px; background: #0066ff; color: white; border: none; padding: 20px; border-radius: 15px; font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        
+        #auth-screen { position: fixed; inset: 0; background: #050507; z-index: 100; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
 
-// Правильний запит сигналу з таймфреймами
-function getSignal() {
-    let asset = document.getElementById('asset-select').value;
-    let tf = document.getElementById('tf-select').value; // Поле з 1, 5, 15, 30 хв
-    ws.send(JSON.stringify({
-        action: 'get_signal',
-        asset: asset,
-        timeframe: tf
-    }));
-}
+    <div id="auth-screen">
+        <div class="card">
+            <div class="label">Введіть ваш ID для активації</div>
+            <input type="number" id="user-id-input" placeholder="126750131" style="width: 100%; padding: 15px; background: #111; border: 1px solid #222; color: white; border-radius: 12px; text-align: center; font-size: 18px;">
+            <button class="btn-blue" style="position: static; margin-top: 20px; width: 100%;" onclick="connect()">ПІДКЛЮЧИТИСЯ</button>
+        </div>
+    </div>
+
+    <div id="main-ui" class="hidden">
+        <div class="card">
+            <div class="label">Real Pocket Balance</div>
+            <div class="balance">$2,975.53</div>
+            <div class="status">Live Connection</div>
+        </div>
+
+        <div class="asset-card">
+            <div>
+                <div class="asset-name">EUR/USD (OTC)</div>
+                <div style="font-size: 9px; color: #444; margin-top: 4px;">ALGORITHM: QUANTUM V3</div>
+            </div>
+            <div class="accuracy">98.9%</div>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <div class="label">Налаштування сигналу</div>
+            <select id="tf-select">
+                <option value="1m">1 MINUTE</option>
+                <option value="3m">3 MINUTES</option>
+                <option value="5m">5 MINUTES</option>
+                <option value="15m">15 MINUTES</option>
+                <option value="30m">30 MINUTES</option>
+            </select>
+        </div>
+
+        <button class="btn-blue" onclick="getSignal()">Get Signal</button>
+    </div>
+
+    <script>
+        let ws = new WebSocket('ws://127.0.0.1:8765');
+
+        function connect() {
+            let id = document.getElementById('user-id-input').value;
+            ws.send(JSON.stringify({ user_id: id }));
+        }
+
+        ws.onmessage = (e) => {
+            let d = JSON.parse(e.data);
+            if(d.type === 'login_res' && d.success) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+            }
+            if(d.type === 'signal') {
+                alert("СИГНАЛ: " + d.signal + "\nТОЧНІСТЬ: " + d.acc + "%");
+            }
+        };
+
+        function getSignal() {
+            let tf = document.getElementById('tf-select').value;
+            ws.send(JSON.stringify({ action: 'get_signal', asset: 'EUR/USD (OTC)', timeframe: tf }));
+        }
+    </script>
+</body>
+</html>
