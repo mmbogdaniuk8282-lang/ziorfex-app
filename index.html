@@ -2,86 +2,100 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { background: #050507; color: white; font-family: sans-serif; padding: 20px; }
-        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 10px; }
-        input, select, button { width: 100%; padding: 15px; margin-top: 10px; border-radius: 10px; border: none; box-sizing: border-box; }
-        input { background: #15151a; color: white; border: 1px solid #333; }
-        button { background: #0066ff; color: white; font-weight: bold; cursor: pointer; }
+        body { margin: 0; background: #050507; color: white; font-family: sans-serif; padding: 15px; }
+        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .label { font-size: 9px; color: #444; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+        input, select, button { width: 100%; padding: 15px; border-radius: 12px; border: none; margin-top: 5px; box-sizing: border-box; font-family: inherit; }
+        input, select { background: #111; color: white; border: 1px solid #1a1a1e; outline: none; }
+        .btn-main { background: #0066ff; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .balance { font-size: 34px; font-weight: bold; color: #ffb800; text-align: center; margin: 10px 0; }
         .hidden { display: none; }
-        .signal-up { color: #00ffaa; font-size: 40px; }
-        .signal-down { color: #ff3366; font-size: 40px; }
+        
+        /* Signal Overlay */
+        #sig-overlay { display: none; position: fixed; inset: 0; background: #050507; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .sig-val { font-size: 80px; font-weight: 900; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <div id="auth-block" class="card">
-        <label>Введіть SESSID (Твій ID підключення):</label>
-        <input type="text" id="sessid" placeholder="Наприклад: a:4:{s:10:...">
-        <button onclick="connect()">ПІДКЛЮЧИТИСЯ</button>
+    <div id="auth-screen" class="card">
+        <div class="label">Enter SESSID to sync balance & assets</div>
+        <input type="text" id="sessid-input" placeholder="a:4:{s:10:...">
+        <button class="btn-main" style="margin-top: 15px;" onclick="login()">Sync Account</button>
     </div>
 
-    <div id="main-block" class="card hidden">
-        <div style="text-align: center;">Баланс: <b id="bal" style="color: #ffb800;">$0.00</b></div>
-        <hr style="border: 0.5px solid #1a1a1e; margin: 15px 0;">
-        
-        <label>Валютна пара:</label>
-        <select id="asset">
-            <option value="EURUSD_otc">EUR/USD (OTC)</option>
-            <option value="BTCUSD">BTC/USD</option>
-        </select>
+    <div id="main-screen" class="hidden">
+        <div class="card">
+            <div class="label">Real Account Balance</div>
+            <div id="bal" class="balance">$0.00</div>
+            <div style="text-align: center; font-size: 9px; color: #00ffaa;">CONNECTED TO ID: 126750131</div>
+        </div>
 
-        <label>Таймфрейм:</label>
-        <select id="tf">
-            <option value="60">1 МИНУТА</option>
-            <option value="300">5 МИНУТ</option>
-        </select>
+        <div class="card">
+            <div class="label">Asset (Parsed from Pocket)</div>
+            <select id="asset-list"></select>
 
-        <button onclick="getSignal()" style="background: #ffb800; color: black; margin-top: 20px;">ОТРИМАТИ СИГНАЛ</button>
+            <div class="label" style="margin-top: 15px;">Timeframe</div>
+            <select id="tf-list">
+                <option value="1m">1 MINUTE</option>
+                <option value="3m">3 MINUTES</option>
+                <option value="5m">5 MINUTES</option>
+                <option value="15m">15 MINUTES</option>
+                <option value="30m">30 MINUTES</option>
+            </select>
+        </div>
+        <button class="btn-main" onclick="getSignal()">Get Signal</button>
     </div>
 
-    <div id="res-block" class="card hidden" style="text-align: center;">
-        <div id="signal-text"></div>
-        <div id="acc-text"></div>
-        <button onclick="back()" style="background: transparent; border: 1px solid #333;">НАЗАД</button>
+    <div id="sig-overlay">
+        <div class="label" id="sig-info"></div>
+        <div id="sig-res" class="sig-val"></div>
+        <div id="sig-acc" style="color: #00ffaa; font-weight: bold;"></div>
+        <button class="btn-main" style="width: 200px; background: transparent; border: 1px solid #222; margin-top: 40px;" onclick="closeSig()">Back</button>
     </div>
 
     <script>
         let ws = new WebSocket('ws://127.0.0.1:8765');
 
-        function connect() {
-            let id = document.getElementById('sessid').value;
-            ws.send(JSON.stringify({ action: 'connect_id', user_id: id }));
-        }
-
-        function getSignal() {
-            let asset = document.getElementById('asset').value;
-            let tf = document.getElementById('tf').value;
-            ws.send(JSON.stringify({ action: 'get_signal', asset: asset, timeframe: tf }));
-            document.getElementById('main-block').classList.add('hidden');
-            document.getElementById('res-block').classList.remove('hidden');
-            document.getElementById('signal-text').innerHTML = "АНАЛІЗ...";
+        function login() {
+            let sid = document.getElementById('sessid-input').value;
+            ws.send(JSON.stringify({ action: 'login', sessid: sid }));
         }
 
         ws.onmessage = (e) => {
             let d = JSON.parse(e.data);
-            if(d.type === 'auth_success') {
-                document.getElementById('auth-block').classList.add('hidden');
-                document.getElementById('main-block').classList.remove('hidden');
+            if(d.type === 'login_res' && d.success) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('main-screen').classList.remove('hidden');
                 document.getElementById('bal').innerText = '$' + d.balance;
+
+                // Заповнюємо список валют тими, що реально є на акку
+                let sel = document.getElementById('asset-list');
+                sel.innerHTML = '';
+                d.assets.forEach(a => {
+                    let o = document.createElement('option');
+                    o.value = a; o.innerText = a.toUpperCase().replace('_OTC', ' (OTC)');
+                    sel.appendChild(o);
+                });
             }
             if(d.type === 'signal') {
-                document.getElementById('signal-text').innerHTML = d.signal === 'UP' ? '<span class="signal-up">UP ↑</span>' : '<span class="signal-down">DOWN ↓</span>';
-                document.getElementById('acc-text').innerText = d.acc + '% Accuracy';
+                document.getElementById('sig-info').innerText = d.asset.toUpperCase() + " | " + d.tf.toUpperCase();
+                document.getElementById('sig-res').innerText = d.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
+                document.getElementById('sig-res').style.color = d.signal === 'UP' ? '#00ffaa' : '#ff3366';
+                document.getElementById('sig-acc').innerText = d.acc + '% ACCURACY';
             }
-            if(d.type === 'error') alert(d.msg);
         };
 
-        function back() {
-            document.getElementById('res-block').classList.add('hidden');
-            document.getElementById('main-block').classList.remove('hidden');
+        function getSignal() {
+            let asset = document.getElementById('asset-list').value;
+            let tf = document.getElementById('tf-list').value;
+            document.getElementById('sig-overlay').style.display = 'flex';
+            ws.send(JSON.stringify({ action: 'get_signal', asset: asset, timeframe: tf }));
         }
+
+        function closeSig() { document.getElementById('sig-overlay').style.display = 'none'; }
     </script>
 </body>
 </html>
