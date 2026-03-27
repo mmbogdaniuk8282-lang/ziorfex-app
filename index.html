@@ -1,330 +1,76 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ziorfex Trade Bot</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Ziorfex Quantum</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+        body { margin: 0; background: #050507; color: white; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; justify-content: space-between; padding: 20px; box-sizing: border-box; }
+        .balance-card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 20px; padding: 30px; text-align: center; }
+        .label { font-size: 8px; color: #444; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        .value { font-size: 38px; font-weight: bold; color: #ffb800; margin-bottom: 15px; }
+        .status { font-size: 9px; padding: 5px 15px; border-radius: 20px; background: rgba(0,255,170,0.1); color: #00ffaa; border: 1px solid #00ffaa33; display: inline-block; }
+        .asset-card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .asset-name { font-weight: bold; font-size: 14px; }
+        .algo { font-size: 9px; color: #444; margin-top: 5px; }
+        .percent { color: #0066ff; font-weight: bold; }
+        .btn { background: #0066ff; color: white; border: none; padding: 20px; border-radius: 15px; font-weight: bold; font-size: 16px; width: 100%; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
         
-        :root {
-            --bg-color: #050507;
-            --card-color: #0a0a0d;
-            --accent-color: #0066ff;
-            --text-color: #ffffff;
-            --gold-color: #ffb800;
-            --green-color: #00ffaa;
-            --red-color: #ff3366;
-            --border-color: #1a1a1e;
-        }
-
-        body {
-            margin: 0;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* HEADER */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: var(--card-color);
-            border-bottom: 1px solid var(--border-color);
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        /* BALANCE CARD */
-        .balance-card {
-            background: linear-gradient(145deg, #0f0f13, #050507);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 30px;
-            margin: 20px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .balance-label {
-            font-size: 8px;
-            color: #444;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .balance-value {
-            font-size: 36px;
-            font-weight: 900;
-            color: var(--gold-color);
-            margin: 10px 0;
-            text-shadow: 0 0 15px rgba(255,184,0,0.3);
-        }
-
-        .status-tag {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 8px;
-            font-weight: 700;
-            background: rgba(255,51,102,0.1); /* Red default */
-            color: var(--red-color);
-            border: 1px solid rgba(255,51,102,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .status-tag.connected {
-            background: rgba(0,255,170,0.1);
-            color: var(--green-color);
-            border: 1px solid rgba(0,255,170,0.2);
-        }
-
-        /* ASSET CARD */
-        .asset-card {
-            background: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .asset-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .asset-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-color);
-        }
-
-        .asset-algo {
-            font-size: 8px;
-            color: #444;
-            margin-top: 4px;
-        }
-
-        .asset-accuracy {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-color);
-        }
-
-        /* MAIN BUTTON */
-        .btn-main {
-            width: calc(100% - 40px);
-            padding: 20px;
-            background: var(--accent-color);
-            border: none;
-            border-radius: 15px;
-            color: var(--text-color);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin: auto 20px 20px 20px;
-            box-shadow: 0 10px 25px rgba(0,102,255,0.3);
-            text-transform: uppercase;
-            transition: transform 0.1s, opacity 0.1s;
-        }
-
-        .btn-main:active {
-            transform: scale(0.97);
-            opacity: 0.9;
-        }
-
-        .btn-main:disabled {
-            background: #222;
-            color: #444;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        /* OVERLAY (SIGNAL) */
-        #overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        #overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .analyzing-text {
-            color: var(--accent-color);
-            font-size: 10px;
-            letter-spacing: 10px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            animation: pulse 1.5s infinite;
-        }
-
-        #signal-result {
-            font-size: 90px;
-            font-weight: 900;
-            margin: 20px 0;
-            text-shadow: 0 0 30px rgba(0,255,170,0.3);
-        }
-
-        .signal-accuracy {
-            color: var(--green-color);
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .btn-back {
-            width: 200px;
-            padding: 15px;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            color: var(--text-color);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 50px;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
+        /* Екран сигналу */
+        #signal-screen { display: none; position: fixed; inset: 0; background: #050507; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .signal-val { font-size: 80px; font-weight: 900; margin: 20px 0; }
+        .acc { color: #00ffaa; font-weight: bold; font-size: 20px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <i class="fas fa-arrow-left" style="color: #444;"></i>
-        <span>Ziorfex Trade Bot</span>
-        <i class="fas fa-ellipsis-v" style="color: #444;"></i>
-    </div>
+    <div style="text-align: center; font-weight: bold; font-size: 14px; color: #444;">Ziorfex Trade Bot</div>
 
     <div class="balance-card">
-        <div class="balance-label">REAL POCKET BALANCE</div>
-        <div id="balance" class="balance-value">$0.00</div>
-        <div id="status" class="status-tag">WAITING CONNECTION...</div>
+        <div class="label">Real Pocket Balance</div>
+        <div id="balance" class="value">$2,975.53</div>
+        <div id="status" class="status">LIVE CONNECTION</div>
     </div>
 
     <div class="asset-card">
-        <div class="asset-info">
+        <div>
             <div class="asset-name">EUR/USD (OTC)</div>
-            <div class="asset-algo">ALGORITHM: QUANTUM V3</div>
+            <div class="algo">ALGORITHM: QUANTUM V3</div>
         </div>
-        <div class="asset-accuracy">98.9%</div>
+        <div class="percent">98.9%</div>
     </div>
 
-    <button id="get-signal-btn" class="btn-main" onclick="getSignal()" disabled>GET SIGNAL</button>
+    <button class="btn" onclick="getSignal()">Get Signal</button>
 
-    <div id="overlay">
-        <div class="analyzing-text">ANALYZING...</div>
-        <div id="signal-result">UP ↑</div>
-        <div id="signal-accuracy" class="signal-accuracy">99.1% ACCURACY</div>
-        <button class="btn-back" onclick="closeOverlay()">BACK</button>
+    <div id="signal-screen">
+        <div class="label" style="font-size: 12px;">Analyzing Market...</div>
+        <div id="res" class="signal-val">...</div>
+        <div id="accuracy" class="acc"></div>
+        <button class="btn" style="background: transparent; border: 1px solid #1a1a1e; margin-top: 40px; width: 200px;" onclick="closeSignal()">Back</button>
     </div>
 
     <script>
-        // Ініціалізація Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let socket;
-        const balanceEl = document.getElementById('balance');
-        const statusEl = document.getElementById('status');
-        const getSignalBtn = document.getElementById('get-signal-btn');
-        const overlayEl = document.getElementById('overlay');
-        const signalResultEl = document.getElementById('signal-result');
-        const signalAccuracyEl = document.getElementById('signal-accuracy');
-
-        // Функція підключення до Termux (localhost)
-        function connect() {
-            // На Androidlocalhost це 127.0.0.1
-            socket = new WebSocket('ws://127.0.0.1:8765');
-
-            socket.onopen = () => {
-                console.log('✅ Connected to Termux');
-                statusEl.innerText = 'LIVE CONNECTION';
-                statusEl.classList.add('connected');
-                getSignalBtn.disabled = false;
-            };
-
-            socket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === 'auth' || data.type === 'balance_update') {
-                    balanceEl.innerText = '$' + data.balance;
-                }
-                if (data.type === 'signal') {
-                    showSignal(data.signal, data.acc);
-                }
-                if (data.type === 'error') {
-                    statusEl.innerText = 'ERROR: ' + data.msg;
-                    statusEl.classList.remove('connected');
-                }
-            };
-
-            socket.onclose = () => {
-                console.log('❌ Disconnected');
-                statusEl.innerText = 'WAITING CONNECTION...';
-                statusEl.classList.remove('connected');
-                getSignalBtn.disabled = true;
-                // Спробувати перепідключитися через 5 секунд
-                setTimeout(connect, 5000);
-            };
-
-            socket.onerror = (error) => {
-                console.error('WebSocket Error:', error);
-            };
-        }
-
-        // Функція запиту сигналу
-        function getSignal() {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                overlayEl.classList.add('show');
-                socket.send(JSON.stringify({ action: 'get_signal' }));
-                // Вібрація
-                tg.HapticFeedback.impactOccurred('heavy');
+        let ws = new WebSocket('ws://127.0.0.1:8765');
+        
+        ws.onmessage = (e) => {
+            let data = JSON.parse(e.data);
+            if(data.type === 'auth') document.getElementById('balance').innerText = '$' + data.balance;
+            if(data.type === 'signal') {
+                document.getElementById('res').innerText = data.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
+                document.getElementById('res').style.color = data.signal === 'UP' ? '#00ffaa' : '#ff3366';
+                document.getElementById('accuracy').innerText = data.acc + '% ACCURACY';
             }
+        };
+
+        function getSignal() {
+            document.getElementById('signal-screen').style.display = 'flex';
+            document.getElementById('res').innerText = '...';
+            document.getElementById('accuracy').innerText = '';
+            ws.send(JSON.stringify({action: 'get_signal'}));
         }
 
-        // Відображення отриманого сигналу
-        function showSignal(signal, accuracy) {
-            signalResultEl.innerText = signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
-            signalResultEl.style.color = signal === 'UP' ? 'var(--green-color)' : 'var(--red-color)';
-            signalResultEl.style.textShadow = signal === 'UP' ? '0 0 30px rgba(0,255,170,0.3)' : '0 0 30px rgba(255,51,102,0.3)';
-            signalAccuracyEl.innerText = accuracy + '% ACCURACY';
-            // Вібрація "успіх"
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        function closeOverlay() {
-            overlayEl.classList.remove('show');
-        }
-
-        // Запускаємо коннект при завантаженні
-        connect();
+        function closeSignal() { document.getElementById('signal-screen').style.display = 'none'; }
     </script>
 </body>
 </html>
+
