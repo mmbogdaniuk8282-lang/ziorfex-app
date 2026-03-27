@@ -2,106 +2,85 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ziorfex Pro Quantum</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { margin: 0; background: #050507; color: white; font-family: 'Segoe UI', sans-serif; padding: 15px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
-        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; background: #111; border: 1px solid #1a1a1e; color: white; padding: 12px; border-radius: 10px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #0066ff; }
-        
-        .balance-val { font-size: 32px; font-weight: bold; color: #ffb800; text-align: center; margin: 10px 0; }
-        .status { font-size: 10px; text-align: center; color: #00ffaa; text-transform: uppercase; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-main { background: #0066ff; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin-top: auto; text-transform: uppercase; cursor: pointer; }
-        
-        /* Екран сигналу */
-        #sig-screen { display: none; position: fixed; inset: 0; background: #050507; z-index: 200; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
-        .sig-box { font-size: 70px; font-weight: 900; margin: 20px 0; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { background: #050507; color: white; font-family: sans-serif; padding: 20px; }
+        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 10px; }
+        input, select, button { width: 100%; padding: 15px; margin-top: 10px; border-radius: 10px; border: none; box-sizing: border-box; }
+        input { background: #15151a; color: white; border: 1px solid #333; }
+        button { background: #0066ff; color: white; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        .signal-up { color: #00ffaa; font-size: 40px; }
+        .signal-down { color: #ff3366; font-size: 40px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <label>User ID / Session ID</label>
-        <input type="text" id="user-id" placeholder="Enter your ID...">
-        <div id="status" class="status" style="margin-top: 10px; color: #444;">Disconnected</div>
+    <div id="auth-block" class="card">
+        <label>Введіть SESSID (Твій ID підключення):</label>
+        <input type="text" id="sessid" placeholder="Наприклад: a:4:{s:10:...">
+        <button onclick="connect()">ПІДКЛЮЧИТИСЯ</button>
     </div>
 
-    <div class="card">
-        <div class="balance-val" id="balance">$0.00</div>
-        <div class="status">Live Account Status</div>
+    <div id="main-block" class="card hidden">
+        <div style="text-align: center;">Баланс: <b id="bal" style="color: #ffb800;">$0.00</b></div>
+        <hr style="border: 0.5px solid #1a1a1e; margin: 15px 0;">
+        
+        <label>Валютна пара:</label>
+        <select id="asset">
+            <option value="EURUSD_otc">EUR/USD (OTC)</option>
+            <option value="BTCUSD">BTC/USD</option>
+        </select>
+
+        <label>Таймфрейм:</label>
+        <select id="tf">
+            <option value="60">1 МИНУТА</option>
+            <option value="300">5 МИНУТ</option>
+        </select>
+
+        <button onclick="getSignal()" style="background: #ffb800; color: black; margin-top: 20px;">ОТРИМАТИ СИГНАЛ</button>
     </div>
 
-    <div class="card">
-        <div class="grid">
-            <div class="input-group">
-                <label>Asset</label>
-                <select id="asset">
-                    <option value="EUR/USD">EUR/USD (OTC)</option>
-                    <option value="BTC/USD">BTC/USD</option>
-                    <option value="ETH/USD">ETH/USD</option>
-                    <option value="GOLD">GOLD</option>
-                    <option value="APPLE">APPLE</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Timeframe</label>
-                <select id="timeframe">
-                    <option value="M1">1 MINUTE</option>
-                    <option value="M5">5 MINUTES</option>
-                    <option value="M15">15 MINUTES</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <button class="btn-main" onclick="sendRequest()">Get Quantum Signal</button>
-
-    <div id="sig-screen">
-        <div style="font-size: 12px; color: #0066ff; letter-spacing: 5px;">ANALYZING...</div>
-        <div id="asset-display" style="font-size: 14px; margin-top: 10px;"></div>
-        <div id="sig-res" class="sig-box">UP ↑</div>
-        <div id="sig-acc" style="color: #00ffaa; font-weight: bold;">98.2% ACCURACY</div>
-        <button class="btn-main" style="width: 200px; background: transparent; border: 1px solid #222; margin-top: 40px;" onclick="document.getElementById('sig-screen').style.display='none'">Back</button>
+    <div id="res-block" class="card hidden" style="text-align: center;">
+        <div id="signal-text"></div>
+        <div id="acc-text"></div>
+        <button onclick="back()" style="background: transparent; border: 1px solid #333;">НАЗАД</button>
     </div>
 
     <script>
         let ws = new WebSocket('ws://127.0.0.1:8765');
-        
-        ws.onopen = () => { document.getElementById('status').innerText = 'System Ready'; document.getElementById('status').style.color = '#00ffaa'; };
-        ws.onclose = () => { document.getElementById('status').innerText = 'Connection Lost'; document.getElementById('status').style.color = '#ff3366'; };
+
+        function connect() {
+            let id = document.getElementById('sessid').value;
+            ws.send(JSON.stringify({ action: 'connect_id', user_id: id }));
+        }
+
+        function getSignal() {
+            let asset = document.getElementById('asset').value;
+            let tf = document.getElementById('tf').value;
+            ws.send(JSON.stringify({ action: 'get_signal', asset: asset, timeframe: tf }));
+            document.getElementById('main-block').classList.add('hidden');
+            document.getElementById('res-block').classList.remove('hidden');
+            document.getElementById('signal-text').innerHTML = "АНАЛІЗ...";
+        }
 
         ws.onmessage = (e) => {
             let d = JSON.parse(e.data);
-            if(d.type === 'auth') document.getElementById('balance').innerText = '$' + d.balance;
-            if(d.type === 'signal') {
-                document.getElementById('sig-res').innerText = d.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
-                document.getElementById('sig-res').style.color = d.signal === 'UP' ? '#00ffaa' : '#ff3366';
-                document.getElementById('sig-acc').innerText = d.acc + '% ACCURACY';
+            if(d.type === 'auth_success') {
+                document.getElementById('auth-block').classList.add('hidden');
+                document.getElementById('main-block').classList.remove('hidden');
+                document.getElementById('bal').innerText = '$' + d.balance;
             }
+            if(d.type === 'signal') {
+                document.getElementById('signal-text').innerHTML = d.signal === 'UP' ? '<span class="signal-up">UP ↑</span>' : '<span class="signal-down">DOWN ↓</span>';
+                document.getElementById('acc-text').innerText = d.acc + '% Accuracy';
+            }
+            if(d.type === 'error') alert(d.msg);
         };
 
-        function sendRequest() {
-            let id = document.getElementById('user-id').value;
-            let asset = document.getElementById('asset').value;
-            let time = document.getElementById('timeframe').value;
-            
-            if(!id) { alert('Please enter User ID'); return; }
-
-            document.getElementById('asset-display').innerText = asset + ' (' + time + ')';
-            document.getElementById('sig-screen').style.display = 'flex';
-            
-            ws.send(JSON.stringify({
-                action: 'get_signal',
-                user_id: id,
-                asset: asset,
-                timeframe: time
-            }));
+        function back() {
+            document.getElementById('res-block').classList.add('hidden');
+            document.getElementById('main-block').classList.remove('hidden');
         }
     </script>
 </body>
