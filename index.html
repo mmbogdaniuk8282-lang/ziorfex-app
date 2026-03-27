@@ -3,186 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bogdaniuk Zenith G11</title>
+    <title>POCKET AI ULTIMATE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;700;900&display=swap');
+        :root { --blue: #0066ff; --bg: #050507; --card: #0d0d10; --green: #00ffaa; --red: #ff3366; --gold: #ffb800; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .container { padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        
+        .header { background: var(--card); border: 1px solid #1a1a1e; border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: center; }
+        .label { font-size: 9px; color: #444; letter-spacing: 3px; text-transform: uppercase; }
+        #balance { font-family: 'Orbitron'; font-size: 34px; font-weight: 900; color: var(--gold); margin: 10px 0; text-shadow: 0 0 20px rgba(255,184,0,0.2); }
+        
+        .status-tag { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 8px; font-weight: 800; background: rgba(0,255,170,0.1); color: var(--green); border: 1px solid rgba(0,255,170,0.2); }
 
-        :root {
-            --accent: #00f2ff; --bg: #050507; --card: rgba(20, 20, 25, 0.8);
-            --green: #00ffa3; --red: #ff3366; --glass: rgba(255, 255, 255, 0.03);
-        }
+        .market-info { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid #1a1a1e; margin-bottom: 20px; }
+        .pair-name { font-weight: 800; font-size: 14px; }
+        .accuracy-val { color: var(--blue); font-family: 'Orbitron'; font-size: 12px; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; background: var(--bg); color: #fff;
-            font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh;
-        }
+        .btn-main { width: 100%; padding: 22px; border-radius: 18px; border: none; background: var(--blue); color: #fff; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; margin-top: auto; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,102,255,0.3); }
 
-        /* АНІМОВАНИЙ ФОН */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, #003344 0%, transparent 50%);
-            z-index: -1; pointer-events: none;
-        }
-
-        .page { display: none; padding: 20px; height: calc(100vh - 85px); overflow-y: auto; }
-        .page.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 14px; font-weight: 900; background: linear-gradient(90deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
-
-        /* MONITOR SECTION */
-        .main-card {
-            background: var(--card); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 35px; padding: 30px 20px; position: relative;
-            backdrop-filter: blur(20px); box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            margin-bottom: 25px;
-        }
-        #price { font-family: 'Orbitron'; font-size: 42px; font-weight: 700; color: #fff; letter-spacing: -1px; }
-
-        /* TRENDS LIST */
-        .trend-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 18px; background: var(--glass); border-radius: 20px;
-            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.02);
-            transition: 0.3s;
-        }
-        .trend-item:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
-
-        /* FOOTER NAV */
-        .nav {
-            position: fixed; bottom: 0; width: 100%; height: 85px;
-            background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex; justify-content: space-around; align-items: center; padding-bottom: 20px;
-        }
-        .nav-link { color: #555; text-align: center; font-size: 10px; font-weight: 700; transition: 0.3s; text-decoration: none; }
-        .nav-link.active { color: var(--accent); }
-        .nav-link i { font-size: 22px; display: block; margin-bottom: 6px; }
-
-        /* BUTTONS */
-        .btn-glow {
-            width: 100%; padding: 22px; border-radius: 25px; border: none;
-            background: linear-gradient(135deg, var(--accent), #0077ff);
-            color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 14px;
-            cursor: pointer; box-shadow: 0 10px 30px rgba(0, 242, 255, 0.2);
-            text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        /* OVERLAY СИГНАЛУ */
-        #sig-overlay {
-            display: none; position: fixed; inset: 0; background: #000; z-index: 2000;
-            flex-direction: column; align-items: center; justify-content: center; text-align: center;
-        }
-        #res-dir { font-family: 'Orbitron'; font-size: 100px; font-weight: 900; margin: 20px 0; }
-        .accuracy-badge { padding: 10px 25px; border-radius: 50px; background: #0a0a0c; border: 1px solid #1a1a1c; font-weight: 800; color: var(--green); }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #sig-res { font-family: 'Orbitron'; font-size: 90px; font-weight: 900; margin: 30px 0; }
+        .acc-text { color: var(--green); font-size: 20px; font-weight: 800; }
     </style>
 </head>
 <body>
-
-    <div class="bg-glow"></div>
-
-    <div class="header">
-        <div class="logo">BOGDANIUK ZENITH</div>
-        <div style="font-size: 8px; color: #444; letter-spacing: 2px;">V15.0_PRO</div>
-    </div>
-
-    <div id="terminal" class="page active">
-        <div class="main-card">
-            <span style="font-size: 8px; color: var(--accent); letter-spacing: 4px; display: block; margin-bottom: 10px;">NEURAL_MARKET_FEED</span>
-            <div id="price">0.91230</div>
-            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                <span style="font-size: 9px; color: var(--green);">● RSI: BUY</span>
-                <span style="font-size: 9px; color: #444;">● STOCH: NEUTRAL</span>
-            </div>
+    <div class="container">
+        <div class="header">
+            <div class="label">REAL POCKET BALANCE</div>
+            <div id="balance">$0.00</div>
+            <div class="status-tag" id="conn-status">WAITING CONNECTION...</div>
         </div>
 
-        <button class="btn-glow" onclick="showSignal()">Аналізувати актив</button>
-
-        <div style="margin-top: 30px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span style="font-size: 10px; font-weight: 800; color: #333; letter-spacing: 2px;">LIVE TRENDS</span>
-                <span style="font-size: 10px; color: var(--green);">99% ACCURACY</span>
+        <div class="market-info">
+            <div>
+                <div class="pair-name">EUR/USD (OTC)</div>
+                <div style="font-size: 8px; color: #444; margin-top: 4px;">ALGORITHM: QUANTUM V3</div>
             </div>
-            <div class="trend-item">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <i class="fab fa-ethereum" style="color: #627eea;"></i>
-                    <span style="font-size: 13px; font-weight: 700;">EUR/USD OTC</span>
-                </div>
-                <span style="color: var(--green); font-weight: 800;">+94%</span>
-            </div>
-            <div class="trend-item">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <i class="fas fa-coins" style="color: #f3ba2f;"></i>
-                    <span style="font-size: 13px; font-weight: 700;">XAU/USD (GOLD)</span>
-                </div>
-                <span style="color: var(--green); font-weight: 800;">+91%</span>
-            </div>
+            <div class="accuracy-val" id="top-acc">98.9%</div>
         </div>
+
+        <button class="btn-main" onclick="getSignal()">GET SIGNAL</button>
     </div>
 
-    <div id="wallet" class="page">
-        <div class="main-card" style="padding: 40px 20px;">
-            <span style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">TOTAL ASSETS</span>
-            <div id="balance" style="font-size: 36px; font-weight: 900; margin: 15px 0; color: #fff;">$62,454.27</div>
-            <div style="font-size: 9px; color: var(--green);">USDT (TRC-20) VERIFIED</div>
-        </div>
-        <button class="btn-glow" style="background: transparent; border: 1px solid #1a1a1c; color: #fff;" onclick="alert('Введіть суму виводу')">WITHDRAW FUNDS</button>
-    </div>
-
-    <div id="profile" class="page">
-        <div class="trend-item"><span>Управління VIP доступом</span><i class="fas fa-shield-halved"></i></div>
-        <div class="trend-item"><span>Технічна підтримка 24/7</span><i class="fas fa-headset"></i></div>
-        <div class="trend-item"><span>Реферальне посилання</span><i class="fas fa-link"></i></div>
-    </div>
-
-    <div class="nav">
-        <a href="#" class="nav-link active" onclick="navTo('terminal', this)"><i class="fas fa-rocket"></i>TRADE</a>
-        <a href="#" class="nav-link" onclick="navTo('wallet', this)"><i class="fas fa-vault"></i>WALLET</a>
-        <a href="#" class="nav-link" onclick="navTo('profile', this)"><i class="fas fa-user-ninja"></i>PRO</a>
-    </div>
-
-    <div id="sig-overlay">
-        <div style="font-family: 'Orbitron'; font-size: 10px; color: var(--accent); letter-spacing: 10px;">ANALYZING...</div>
-        <div id="res-dir">CALL</div>
-        <div class="accuracy-badge" id="res-acc">99.2% PROBABILITY</div>
-        <button class="btn-glow" style="width: 200px; margin-top: 60px; background: transparent; border: 1px solid #111; color: #fff;" onclick="location.reload()">TERMINATE</button>
+    <div id="overlay">
+        <div style="color: var(--blue); font-size: 10px; letter-spacing: 10px;">ANALYZING...</div>
+        <div id="sig-res">UP</div>
+        <div class="acc-text" id="sig-acc">99.1%</div>
+        <button class="btn-main" style="width: 220px; background: transparent; border: 1px solid #222; margin-top: 50px;" onclick="location.reload()">BACK</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
+        let ws;
 
-        function navTo(page, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-            el.classList.add('active');
-            tg.HapticFeedback.impactOccurred('medium');
+        function initWS() {
+            ws = new WebSocket('ws://localhost:8765');
+            ws.onmessage = (e) => {
+                const d = JSON.parse(e.data);
+                if(d.type === 'auth' || d.type === 'balance_update') {
+                    document.getElementById('balance').innerText = "$" + d.balance;
+                    document.getElementById('conn-status').innerText = "LIVE CONNECTION";
+                }
+                if(d.type === 'signal') {
+                    renderSignal(d.signal, d.acc);
+                }
+            };
         }
 
-        async function showSignal() {
+        function getSignal() {
+            document.getElementById('overlay').style.display = 'flex';
+            ws.send(JSON.stringify({action: 'get_signal'}));
             tg.HapticFeedback.impactOccurred('heavy');
-            document.getElementById('sig-overlay').style.display = 'flex';
-            
-            await new Promise(r => setTimeout(r, 4500));
-            
-            const isCall = Math.random() > 0.45;
-            const resDir = document.getElementById('res-dir');
-            resDir.innerText = isCall ? "CALL ↑" : "PUT ↓";
-            resDir.style.color = isCall ? "var(--green)" : "var(--red)";
-            resDir.style.textShadow = `0 0 80px ${isCall ? 'var(--green)' : 'var(--red)'}`;
-            
-            document.getElementById('res-acc').innerText = (98.9 + Math.random()*1).toFixed(1) + "% PROBABILITY";
+        }
+
+        function renderSignal(s, a) {
+            const res = document.getElementById('sig-res');
+            res.innerText = s === "UP" ? "UP ↑" : "DOWN ↓";
+            res.style.color = s === "UP" ? "var(--green)" : "var(--red)";
+            document.getElementById('sig-acc').innerText = a + "% ACCURACY";
             tg.HapticFeedback.notificationOccurred('success');
         }
 
-        setInterval(() => {
-            document.getElementById('price').innerText = (0.91200 + Math.random()*0.00180).toFixed(5);
-        }, 600);
+        initWS();
     </script>
 </body>
 </html>
