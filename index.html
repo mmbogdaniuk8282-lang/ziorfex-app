@@ -1,97 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        body { margin: 0; background: #050507; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
-        .card { background: #0a0a0d; border: 1px solid #1a1a1e; border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .label { font-size: 10px; color: #555; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-        input, select, button { width: 100%; padding: 15px; border-radius: 12px; border: none; margin-top: 5px; box-sizing: border-box; font-family: inherit; }
-        input, select { background: #111; color: white; border: 1px solid #222; outline: none; }
-        .btn-blue { background: #0066ff; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .balance { font-size: 34px; font-weight: bold; color: #ffb800; text-align: center; margin: 15px 0; }
-        .hidden { display: none; }
-        #sig-overlay { display: none; position: fixed; inset: 0; background: #050507; z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .sig-val { font-size: 85px; font-weight: 900; margin: 20px 0; }
-    </style>
-</head>
-<body>
+// Правильна функція входу
+function login() {
+    let idValue = document.getElementById('id-input').value; // Твоє поле для ID
+    ws.send(JSON.stringify({ 
+        user_id: idValue // Відправляємо ID на сервер
+    }));
+}
 
-    <div id="login-box" class="card">
-        <div class="label">User Identification</div>
-        <input type="number" id="uid-input" placeholder="Введите ваш ID (126750131)">
-        <button class="btn-blue" style="margin-top: 15px;" onclick="doLogin()">Войти в систему</button>
-    </div>
-
-    <div id="main-ui" class="hidden">
-        <div class="card">
-            <div class="label">Real Account Balance</div>
-            <div id="bal-text" class="balance">$0.00</div>
-            <div style="text-align: center; font-size: 10px; color: #00ffaa;">ID: 126750131 | PREMIUM ACCESS</div>
-        </div>
-
-        <div class="card">
-            <label class="label">Выберите актив</label>
-            <select id="asset-select"></select>
-
-            <label class="label" style="display: block; margin-top: 15px;">Время экспирации</label>
-            <select id="tf-select">
-                <option value="1m">1 МИНУТА</option>
-                <option value="3m">3 МИНУТЫ</option>
-                <option value="5m">5 МИНУТ</option>
-                <option value="15m">15 МИНУТ</option>
-                <option value="30m">30 МИНУТ</option>
-            </select>
-        </div>
-        <button class="btn-blue" onclick="getSignal()">Получить сигнал</button>
-    </div>
-
-    <div id="sig-overlay">
-        <div class="label" id="info-top"></div>
-        <div id="sig-res" class="sig-val"></div>
-        <div id="sig-acc" style="color: #00ffaa; font-weight: bold; font-size: 18px;"></div>
-        <button class="btn-blue" style="width: 200px; background: transparent; border: 1px solid #333; margin-top: 50px;" onclick="document.getElementById('sig-overlay').style.display='none'">Назад</button>
-    </div>
-
-    <script>
-        let ws = new WebSocket('ws://127.0.0.1:8765');
-
-        function doLogin() {
-            let id = document.getElementById('uid-input').value;
-            ws.send(JSON.stringify({ action: 'login', user_id: id }));
-        }
-
-        ws.onmessage = (e) => {
-            let d = JSON.parse(e.data);
-            if(d.type === 'login_res' && d.success) {
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('main-ui').classList.remove('hidden');
-                document.getElementById('bal-text').innerText = '$' + d.balance;
-                
-                let sel = document.getElementById('asset-select');
-                d.assets.forEach(a => {
-                    let o = document.createElement('option');
-                    o.value = a; o.innerText = a; sel.appendChild(o);
-                });
-            } else if (d.type === 'login_res') { alert("ОШИБКА: " + d.msg); }
-
-            if(d.type === 'signal') {
-                document.getElementById('info-top').innerText = d.asset + " [" + d.tf.toUpperCase() + "]";
-                document.getElementById('sig-res').innerText = d.signal === 'UP' ? 'UP ↑' : 'DOWN ↓';
-                document.getElementById('sig-res').style.color = d.signal === 'UP' ? '#00ffaa' : '#ff3366';
-                document.getElementById('sig-acc').innerText = d.acc + '% ACCURACY';
-            }
-        };
-
-        function getSignal() {
-            document.getElementById('sig-overlay').style.display = 'flex';
-            ws.send(JSON.stringify({
-                action: 'get_signal',
-                asset: document.getElementById('asset-select').value,
-                timeframe: document.getElementById('tf-select').value
-            }));
-        }
-    </script>
-</body>
-</html>
+// Правильний запит сигналу з таймфреймами
+function getSignal() {
+    let asset = document.getElementById('asset-select').value;
+    let tf = document.getElementById('tf-select').value; // Поле з 1, 5, 15, 30 хв
+    ws.send(JSON.stringify({
+        action: 'get_signal',
+        asset: asset,
+        timeframe: tf
+    }));
+}
